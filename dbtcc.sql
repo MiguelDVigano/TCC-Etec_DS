@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 09/05/2025 às 15:19
+-- Tempo de geração: 14/08/2025 às 13:57
 -- Versão do servidor: 10.4.32-MariaDB
 -- Versão do PHP: 8.2.12
 
@@ -24,21 +24,6 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Estrutura para tabela `aluno`
---
-
-CREATE TABLE `aluno` (
-  `id_aluno` int(11) NOT NULL,
-  `nome_aluno` varchar(100) NOT NULL,
-  `email_aluno` varchar(200) NOT NULL,
-  `senha` varchar(100) NOT NULL,
-  `rm` varchar(5) NOT NULL,
-  `id_turma` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
 -- Estrutura para tabela `chamado`
 --
 
@@ -46,23 +31,25 @@ CREATE TABLE `chamado` (
   `id_chamado` int(11) NOT NULL,
   `titulo_chamado` varchar(100) NOT NULL,
   `descricao` text NOT NULL,
-  `url_foto` varchar(200) NOT NULL,
+  `url_foto` varchar(200) DEFAULT NULL,
   `data_chamado` date NOT NULL,
-  `status_chamado` varchar(100) NOT NULL,
-  `id_sala` int(11) NOT NULL
+  `status_chamado` enum('Aberto','Em Andamento','Concluido') DEFAULT 'Aberto',
+  `id_sala` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Estrutura para tabela `manutencao`
+-- Estrutura para tabela `matricula`
 --
 
-CREATE TABLE `manutencao` (
-  `id_prof` int(11) NOT NULL,
-  `nome_manu` varchar(100) NOT NULL,
-  `email_manu` varchar(200) NOT NULL,
-  `senha` varchar(100) NOT NULL
+CREATE TABLE `matricula` (
+  `id_matricula` int(11) NOT NULL,
+  `id_aluno` int(11) NOT NULL,
+  `id_turma` int(11) NOT NULL,
+  `data_matricula` date DEFAULT curdate()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -72,27 +59,24 @@ CREATE TABLE `manutencao` (
 --
 
 CREATE TABLE `notificacao` (
-  `id_notifica` int(11) NOT NULL,
-  `titulo_notifica` varchar(100) NOT NULL,
+  `id_notificacao` int(11) NOT NULL,
+  `titulo_notificacao` varchar(100) NOT NULL,
   `mensagem` text NOT NULL,
-  `data_notifica` date NOT NULL,
-  `id_turma` int(11) NOT NULL,
+  `data_notificacao` date NOT NULL,
   `id_professor` int(11) NOT NULL,
-  `id_aluno` int(11) NOT NULL
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Estrutura para tabela `professor`
+-- Estrutura para tabela `notificacao_turma`
 --
 
-CREATE TABLE `professor` (
-  `id_prof` int(11) NOT NULL,
-  `nome_prof` varchar(100) NOT NULL,
-  `email_prof` varchar(200) NOT NULL,
-  `tel_prof` varchar(11) NOT NULL,
-  `senha` varchar(100) NOT NULL
+CREATE TABLE `notificacao_turma` (
+  `id_notificacao` int(11) NOT NULL,
+  `id_turma` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -109,7 +93,9 @@ CREATE TABLE `reserva` (
   `id_professor` int(11) NOT NULL,
   `id_sala` int(11) NOT NULL,
   `id_turma` int(11) NOT NULL,
-  `observacao` text NOT NULL
+  `observacao` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -120,11 +106,13 @@ CREATE TABLE `reserva` (
 
 CREATE TABLE `sala` (
   `id_sala` int(11) NOT NULL,
-  `numeo_sala` int(11) NOT NULL,
+  `numero_sala` int(11) NOT NULL,
   `titulo_sala` varchar(100) NOT NULL,
-  `tipo_sala` varchar(10) NOT NULL,
-  `capacidade` varchar(4) NOT NULL,
-  `status_sala` tinyint(1) NOT NULL
+  `tipo_sala` enum('Teorica','Pratica','Mista') NOT NULL,
+  `capacidade` int(11) NOT NULL,
+  `status_sala` enum('Ativa','Inativa') DEFAULT 'Ativa',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -135,7 +123,26 @@ CREATE TABLE `sala` (
 
 CREATE TABLE `turma` (
   `id_turma` int(11) NOT NULL,
-  `nome_turma` varchar(100) NOT NULL
+  `nome_turma` varchar(100) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura para tabela `usuario`
+--
+
+CREATE TABLE `usuario` (
+  `id_usuario` int(11) NOT NULL,
+  `nome` varchar(100) NOT NULL,
+  `email` varchar(200) NOT NULL,
+  `senha_hash` varchar(255) NOT NULL,
+  `tipo_usuario` enum('Aluno','Professor','Manutencao') NOT NULL,
+  `telefone` char(11) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -143,70 +150,68 @@ CREATE TABLE `turma` (
 --
 
 --
--- Índices de tabela `aluno`
---
-ALTER TABLE `aluno`
-  ADD PRIMARY KEY (`id_aluno`),
-  ADD KEY `fk_aluno_turma` (`id_turma`);
-
---
 -- Índices de tabela `chamado`
 --
 ALTER TABLE `chamado`
   ADD PRIMARY KEY (`id_chamado`),
-  ADD KEY `fk_chamado_sala` (`id_sala`);
+  ADD KEY `id_sala` (`id_sala`);
 
 --
--- Índices de tabela `manutencao`
+-- Índices de tabela `matricula`
 --
-ALTER TABLE `manutencao`
-  ADD PRIMARY KEY (`id_prof`);
+ALTER TABLE `matricula`
+  ADD PRIMARY KEY (`id_matricula`),
+  ADD KEY `id_aluno` (`id_aluno`),
+  ADD KEY `id_turma` (`id_turma`);
 
 --
 -- Índices de tabela `notificacao`
 --
 ALTER TABLE `notificacao`
-  ADD PRIMARY KEY (`id_notifica`),
-  ADD KEY `fk_notificacao_professor` (`id_professor`),
-  ADD KEY `fk_notificacao_turma` (`id_turma`),
-  ADD KEY `fk_notificacao_aluno` (`id_aluno`);
+  ADD PRIMARY KEY (`id_notificacao`),
+  ADD KEY `id_professor` (`id_professor`);
 
 --
--- Índices de tabela `professor`
+-- Índices de tabela `notificacao_turma`
 --
-ALTER TABLE `professor`
-  ADD PRIMARY KEY (`id_prof`);
+ALTER TABLE `notificacao_turma`
+  ADD PRIMARY KEY (`id_notificacao`,`id_turma`),
+  ADD KEY `id_turma` (`id_turma`);
 
 --
 -- Índices de tabela `reserva`
 --
 ALTER TABLE `reserva`
   ADD PRIMARY KEY (`id_reserva`),
-  ADD KEY `fk_reserva_sala` (`id_sala`),
-  ADD KEY `fk_reserva_turma` (`id_turma`),
-  ADD KEY `fk_reserva_professor` (`id_professor`);
+  ADD KEY `id_professor` (`id_professor`),
+  ADD KEY `id_sala` (`id_sala`),
+  ADD KEY `id_turma` (`id_turma`);
 
 --
 -- Índices de tabela `sala`
 --
 ALTER TABLE `sala`
-  ADD PRIMARY KEY (`id_sala`);
+  ADD PRIMARY KEY (`id_sala`),
+  ADD KEY `idx_numero_sala` (`numero_sala`);
 
 --
 -- Índices de tabela `turma`
 --
 ALTER TABLE `turma`
-  ADD PRIMARY KEY (`id_turma`);
+  ADD PRIMARY KEY (`id_turma`),
+  ADD KEY `idx_nome_turma` (`nome_turma`);
+
+--
+-- Índices de tabela `usuario`
+--
+ALTER TABLE `usuario`
+  ADD PRIMARY KEY (`id_usuario`),
+  ADD UNIQUE KEY `email` (`email`),
+  ADD KEY `idx_email_usuario` (`email`);
 
 --
 -- AUTO_INCREMENT para tabelas despejadas
 --
-
---
--- AUTO_INCREMENT de tabela `aluno`
---
-ALTER TABLE `aluno`
-  MODIFY `id_aluno` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de tabela `chamado`
@@ -215,22 +220,16 @@ ALTER TABLE `chamado`
   MODIFY `id_chamado` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT de tabela `manutencao`
+-- AUTO_INCREMENT de tabela `matricula`
 --
-ALTER TABLE `manutencao`
-  MODIFY `id_prof` int(11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE `matricula`
+  MODIFY `id_matricula` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de tabela `notificacao`
 --
 ALTER TABLE `notificacao`
-  MODIFY `id_notifica` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT de tabela `professor`
---
-ALTER TABLE `professor`
-  MODIFY `id_prof` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_notificacao` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de tabela `reserva`
@@ -251,36 +250,48 @@ ALTER TABLE `turma`
   MODIFY `id_turma` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- Restrições para tabelas despejadas
+-- AUTO_INCREMENT de tabela `usuario`
 --
+ALTER TABLE `usuario`
+  MODIFY `id_usuario` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- Restrições para tabelas `aluno`
+-- Restrições para tabelas despejadas
 --
-ALTER TABLE `aluno`
-  ADD CONSTRAINT `fk_aluno_turma` FOREIGN KEY (`id_turma`) REFERENCES `turma` (`id_turma`);
 
 --
 -- Restrições para tabelas `chamado`
 --
 ALTER TABLE `chamado`
-  ADD CONSTRAINT `fk_chamado_sala` FOREIGN KEY (`id_sala`) REFERENCES `sala` (`id_sala`);
+  ADD CONSTRAINT `chamado_ibfk_1` FOREIGN KEY (`id_sala`) REFERENCES `sala` (`id_sala`) ON DELETE CASCADE;
+
+--
+-- Restrições para tabelas `matricula`
+--
+ALTER TABLE `matricula`
+  ADD CONSTRAINT `matricula_ibfk_1` FOREIGN KEY (`id_aluno`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE,
+  ADD CONSTRAINT `matricula_ibfk_2` FOREIGN KEY (`id_turma`) REFERENCES `turma` (`id_turma`) ON DELETE CASCADE;
 
 --
 -- Restrições para tabelas `notificacao`
 --
 ALTER TABLE `notificacao`
-  ADD CONSTRAINT `fk_notificacao_aluno` FOREIGN KEY (`id_aluno`) REFERENCES `aluno` (`id_aluno`),
-  ADD CONSTRAINT `fk_notificacao_professor` FOREIGN KEY (`id_professor`) REFERENCES `professor` (`id_prof`),
-  ADD CONSTRAINT `fk_notificacao_turma` FOREIGN KEY (`id_turma`) REFERENCES `turma` (`id_turma`);
+  ADD CONSTRAINT `notificacao_ibfk_1` FOREIGN KEY (`id_professor`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE;
+
+--
+-- Restrições para tabelas `notificacao_turma`
+--
+ALTER TABLE `notificacao_turma`
+  ADD CONSTRAINT `notificacao_turma_ibfk_1` FOREIGN KEY (`id_notificacao`) REFERENCES `notificacao` (`id_notificacao`) ON DELETE CASCADE,
+  ADD CONSTRAINT `notificacao_turma_ibfk_2` FOREIGN KEY (`id_turma`) REFERENCES `turma` (`id_turma`) ON DELETE CASCADE;
 
 --
 -- Restrições para tabelas `reserva`
 --
 ALTER TABLE `reserva`
-  ADD CONSTRAINT `fk_reserva_professor` FOREIGN KEY (`id_professor`) REFERENCES `professor` (`id_prof`),
-  ADD CONSTRAINT `fk_reserva_sala` FOREIGN KEY (`id_sala`) REFERENCES `sala` (`id_sala`),
-  ADD CONSTRAINT `fk_reserva_turma` FOREIGN KEY (`id_turma`) REFERENCES `turma` (`id_turma`);
+  ADD CONSTRAINT `reserva_ibfk_1` FOREIGN KEY (`id_professor`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE,
+  ADD CONSTRAINT `reserva_ibfk_2` FOREIGN KEY (`id_sala`) REFERENCES `sala` (`id_sala`) ON DELETE CASCADE,
+  ADD CONSTRAINT `reserva_ibfk_3` FOREIGN KEY (`id_turma`) REFERENCES `turma` (`id_turma`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
