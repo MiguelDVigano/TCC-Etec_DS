@@ -19,6 +19,12 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
 </head>
 
 <body>
+    <?php if (isset($_GET['erro_reserva'])): ?>
+        <div id="alertReservaErroTopo" class="alert alert-danger text-center position-fixed w-100"
+            style="top:0;left:0;z-index:1055;">
+            <?= htmlspecialchars($_GET['erro_reserva']) ?>
+        </div>
+    <?php endif; ?>
     <nav class="navbar navbar-expand-lg bg-body-tertiary">
         <div class="container-fluid">
             <a class="navbar-brand">Navbar</a>
@@ -42,10 +48,20 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
                                 <p class="card-text">
                                     <strong>Número:</strong> <?= $lab['numero_sala'] ?><br>
                                     <strong>Capacidade:</strong> <?= $lab['capacidade'] ?><br>
-                                    <strong>Status:</strong> <?= $lab['status_sala'] === 'Ativa' ? 'Ativo' : 'Inativo' ?>
+                                    <strong>Status:</strong>
+                                    <?php
+                                    if ($lab['status_sala'] === 'Ativa') {
+                                        echo 'Ativo';
+                                    } else if ($lab['status_sala'] === 'Ocupado') {
+                                        echo 'Ocupado';
+                                    } else {
+                                        echo 'Inativo';
+                                    }
+                                    ?>
                                 </p>
                                 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalReserva"
-                                    data-id="<?= $lab['id_sala'] ?>" data-titulo="<?= htmlspecialchars($lab['titulo_sala']) ?>">
+                                    data-id="<?= $lab['id_sala'] ?>" data-titulo="<?= htmlspecialchars($lab['titulo_sala']) ?>"
+                                    data-status="<?= $lab['status_sala'] ?>">
                                     Reservar
                                 </button>
                             </div>
@@ -63,7 +79,8 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
     <!-- Modal Reserva -->
     <div class="modal fade" id="modalReserva" tabindex="-1" aria-labelledby="modalReservaLabel" aria-hidden="true">
         <div class="modal-dialog">
-            <form class="modal-content" method="POST" action="reservar_laboratorio.php">
+            <!-- Corrigido o action do formulário -->
+            <form class="modal-content" method="POST" action="../control/reservar_laboratorio.php" id="formReserva">
                 <div class="modal-header">
                     <h5 class="modal-title" id="modalReservaLabel">Reservar Laboratório</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
@@ -76,55 +93,28 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
                     </div>
                     <div class="mb-2">
                         <label for="inputData" class="form-label">Data</label>
-                        <input type="date" class="form-control" name="data_reserva" required>
+                        <input type="date" class="form-control" name="data_reserva" id="inputDataReserva" required>
                     </div>
                     <div class="mb-2">
-                        <label for="inputTimeSlot" class="form-label">Horário</label>
-                        <select class="form-select" name="time_slot" required>
-                            <option value="">Selecione</option>
-                            <?php
-                            $timeSlots = [
-                                "07:10-08:00",
-                                "08:00-08:50",
-                                "08:50-09:40",
-                                "10:00-10:50",
-                                "10:50-11:40",
-                                "11:40-12:30",
-                                "13:30-14:20",
-                                "14:20-15:10",
-                                "15:10-16:00",
-                                "19:00-19:50",
-                                "19:50-20:40",
-                                "20:40-21:30",
-                                "21:30-22:20",
-                                "22:20-23:10"
-                            ];
-                            $reservedSlots = [];
-                            $stmt = $conn->prepare("
-                                SELECT hora_inicio, hora_fim 
-                                FROM reserva 
-                                WHERE id_sala = ? 
-                                AND data_reserva = ?
-                            ");
-                            $stmt->bind_param("is", $lab['id_sala'], date('Y-m-d'));
-                            $stmt->execute();
-                            $result = $stmt->get_result();
-                            while ($row = $result->fetch_assoc()) {
-                                $reservedSlots[] = $row['hora_inicio'] . '-' . $row['hora_fim'];
-                            }
-                            foreach ($timeSlots as $slot) {
-                                if (!in_array($slot, $reservedSlots)) {
-                                    echo "<option value=\"$slot\">$slot</option>";
-                                }
-                            }
-                            ?>
+                        <label class="form-label">Horário de Início</label>
+                        <select class="form-select" name="hora_inicio" id="inputHoraInicio" required>
+                            <option value="">Selecione a data primeiro</option>
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Horário de Fim</label>
+                        <select class="form-select" name="hora_fim" id="inputHoraFim" required>
+                            <option value="">Selecione o início primeiro</option>
                         </select>
                     </div>
                     <div class="mb-2">
                         <label for="inputTurma" class="form-label">Turma</label>
                         <select class="form-select" name="id_turma" required>
                             <option value="">Selecione</option>
-                            <?php while ($turma = $turmas->fetch_assoc()): ?>
+                            <?php
+                            // Reset pointer for turmas
+                            $turmas->data_seek(0);
+                            while ($turma = $turmas->fetch_assoc()): ?>
                                 <option value="<?= $turma['id_turma'] ?>"><?= htmlspecialchars($turma['nome_turma']) ?>
                                 </option>
                             <?php endwhile; ?>
@@ -134,7 +124,10 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
                         <label for="inputProfessor" class="form-label">Professor</label>
                         <select class="form-select" name="id_professor" required>
                             <option value="">Selecione</option>
-                            <?php while ($prof = $professores->fetch_assoc()): ?>
+                            <?php
+                            // Reset pointer for professores
+                            $professores->data_seek(0);
+                            while ($prof = $professores->fetch_assoc()): ?>
                                 <option value="<?= $prof['id_professor'] ?>"><?= htmlspecialchars($prof['nome']) ?></option>
                             <?php endwhile; ?>
                         </select>
@@ -154,12 +147,83 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         var modalReserva = document.getElementById('modalReserva');
+        var inputIdSala = document.getElementById('inputIdSala');
+        var inputTituloSala = document.getElementById('inputTituloSala');
+        var inputDataReserva = document.getElementById('inputDataReserva');
+        var inputHoraInicio = document.getElementById('inputHoraInicio');
+        var inputHoraFim = document.getElementById('inputHoraFim');
+        var reservaBtnStatus = null;
+
         modalReserva.addEventListener('show.bs.modal', function (event) {
             var button = event.relatedTarget;
             var idSala = button.getAttribute('data-id');
             var tituloSala = button.getAttribute('data-titulo');
-            document.getElementById('inputIdSala').value = idSala;
-            document.getElementById('inputTituloSala').value = tituloSala;
+            reservaBtnStatus = button.getAttribute('data-status');
+            inputIdSala.value = idSala;
+            inputTituloSala.value = tituloSala;
+            inputHoraInicio.innerHTML = '<option value="">Selecione a data primeiro</option>';
+            inputHoraFim.innerHTML = '<option value="">Selecione o início primeiro</option>';
+            inputDataReserva.value = '';
+        });
+
+        inputDataReserva.addEventListener('change', function () {
+            var idSala = inputIdSala.value;
+            var dataReserva = inputDataReserva.value;
+            if (!idSala || !dataReserva) {
+                inputHoraInicio.innerHTML = '<option value="">Selecione a data primeiro</option>';
+                inputHoraFim.innerHTML = '<option value="">Selecione o início primeiro</option>';
+                return;
+            }
+            fetch('../control/reservar_laboratorio_horarios.php?id_sala=' + idSala + '&data_reserva=' + dataReserva)
+                .then(response => response.json())
+                .then(data => {
+                    inputHoraInicio.innerHTML = '';
+                    inputHoraFim.innerHTML = '<option value="">Selecione o início primeiro</option>';
+                    if (data.length === 0) {
+                        inputHoraInicio.innerHTML = '<option value="">Todos os horários reservados</option>';
+                    } else {
+                        inputHoraInicio.innerHTML = '<option value="">Selecione</option>';
+                        data.forEach(function (slot) {
+                            // slot é "07:10-08:00", mas precisamos enviar só o início
+                            var inicio = slot.split('-')[0];
+                            inputHoraInicio.innerHTML += '<option value="' + inicio + '">' + slot + '</option>';
+                        });
+                    }
+                });
+        });
+
+        inputHoraInicio.addEventListener('change', function () {
+            var idSala = inputIdSala.value;
+            var dataReserva = inputDataReserva.value;
+            var horaInicio = inputHoraInicio.value;
+            if (!idSala || !dataReserva || !horaInicio) {
+                inputHoraFim.innerHTML = '<option value="">Selecione o início primeiro</option>';
+                return;
+            }
+            fetch('../control/reservar_laboratorio_horarios.php?id_sala=' + idSala + '&data_reserva=' + dataReserva)
+                .then(response => response.json())
+                .then(data => {
+                    inputHoraFim.innerHTML = '';
+                    var found = false;
+                    data.forEach(function (slot, idx) {
+                        var inicio = slot.split('-')[0];
+                        var fim = slot.split('-')[1];
+                        if (inicio === horaInicio) found = true;
+                        if (found) {
+                            inputHoraFim.innerHTML += '<option value="' + fim + '">' + slot + '</option>';
+                        }
+                    });
+                });
+        });
+
+        // Remove alerta do topo após 4 segundos
+        document.addEventListener('DOMContentLoaded', function () {
+            var alertTopo = document.getElementById('alertReservaErroTopo');
+            if (alertTopo) {
+                setTimeout(function () {
+                    alertTopo.remove();
+                }, 4000);
+            }
         });
     </script>
 </body>
