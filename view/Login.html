@@ -159,12 +159,12 @@
             <p>Faça login para acessar o sistema</p>
         </div>
 
-        <form id="loginForm" name="loginForm" method="post" action="..controler/realize_login.php" novalidate>
+    <form id="loginForm" name="loginForm" method="post" action="../controler/realize_login.php" novalidate>
             <div class="form-group">
-                <label for="usuario">Usuário</label>
+                <label for="E-mail">E-mail</label>
                 <div class="input-wrapper">
 
-                    <input type="text" id="usuario" name="usuario" placeholder="Digite seu usuário" required>
+                    <input type="email" id="email" name="email" placeholder="Digite seu e-mail" required>
                 </div>
             </div>
 
@@ -180,10 +180,9 @@
                 <label for="tipoUsuario">Tipo de Usuário</label>
                 <select id="tipoUsuario" name="tipoUsuario" required>
                     <option value="" disabled selected>Selecione o tipo de usuário</option>
-                    <option value="administrador">Professor</option>
-                    <option value="funcionario">Aluno</option>
-                    <option value="cliente">Diretor</option>
-                    <option value="visitante">Técnico</option>
+                    <option value="Professor">Professor</option>
+                    <option value="Aluno">Aluno</option>
+                    <option value="Manutencao">Manutenção</option>
                 </select>
             </div>
 
@@ -198,21 +197,7 @@
     </div>
 
     <script>
-        document.getElementById('loginForm').addEventListener('submit', function (e) {
-            e.preventDefault();
-
-            const usuario = document.getElementById('usuario').value;
-            const senha = document.getElementById('senha').value;
-            const tipoUsuario = document.getElementById('tipoUsuario').value;
-
-            if (usuario && senha && tipoUsuario) {
-                alert(`Login realizado com sucesso!\nUsuário: ${usuario}\nTipo: ${tipoUsuario}`);
-
-
-            } else {
-                alert('Por favor, preencha todos os campos obrigatórios.');
-            }
-        });
+    // Removido o popup e o bloqueio do submit. O formulário será enviado normalmente para o PHP.
     </script>
 </body>
 
