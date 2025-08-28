@@ -13,21 +13,82 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #23395d 0%, #4f6d7a 100%);
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             padding: 20px;
         }
 
+        nav {
+            width: 100%;
+            background: linear-gradient(135deg, #23395d 0%, #4f6d7a 100%);
+            padding: 16px 0;
+            box-shadow: 0 2px 8px #23395d12;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 10;
+        }
+
+        .navbar-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+        }
+
+        .navbar-title {
+            color: #fff;
+            font-size: 20px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .navbar-links a,
+        .navbar-links button {
+            color: #fff;
+            text-decoration: none;
+            margin-right: 24px;
+            font-size: 16px;
+            font-weight: 500;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .navbar-links a:last-child,
+        .navbar-links button:last-child {
+            margin-right: 0;
+        }
+
+        .navbar-links button {
+            background: #c0392b;
+            padding: 8px 18px;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .navbar-links button:hover {
+            background: #a93226;
+        }
+
         .container {
-            background: white;
+            background: #f7f9fa;
             border-radius: 15px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 24px #23395d33;
             padding: 40px;
             width: 100%;
             max-width: 600px;
+            margin: 100px auto 0 auto;
+            animation: fadeIn 0.7s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px);}
+            to { opacity: 1; transform: translateY(0);}
         }
 
         .header {
@@ -36,43 +97,45 @@
         }
 
         .header h1 {
-            color: #333;
-            font-size: 28px;
+            color: #23395d;
+            font-size: 26px;
+            font-weight: 700;
             margin-bottom: 8px;
+            letter-spacing: 0.5px;
         }
 
         .header p {
-            color: #666;
-            font-size: 16px;
+            color: #4f6d7a;
+            font-size: 15px;
         }
 
         .form-group {
-            margin-bottom: 25px;
+            margin-bottom: 22px;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 8px;
-            color: #333;
-            font-weight: 600;
-            font-size: 14px;
+            margin-bottom: 7px;
+            color: #23395d;
+            font-weight: 500;
+            font-size: 15px;
         }
 
         .form-control {
             width: 100%;
             padding: 12px 16px;
-            border: 2px solid #e1e5e9;
+            border: 1.5px solid #bfc9d1;
             border-radius: 8px;
             font-size: 16px;
-            transition: all 0.3s ease;
-            background-color: #f8f9fa;
+            background-color: #f7f9fa;
+            transition: border-color 0.3s, box-shadow 0.3s;
         }
 
         .form-control:focus {
             outline: none;
-            border-color: #667eea;
-            background-color: white;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: #23395d;
+            background-color: #fff;
+            box-shadow: 0 0 0 2px #23395d22;
         }
 
         select.form-control {
@@ -87,7 +150,7 @@
 
         .btn-enviar {
             width: 100%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #23395d 0%, #4f6d7a 100%);
             color: white;
             border: none;
             padding: 15px 30px;
@@ -95,41 +158,23 @@
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: background 0.2s, box-shadow 0.2s;
             text-transform: uppercase;
             letter-spacing: 1px;
+            box-shadow: 0 2px 8px #23395d22;
         }
 
         .btn-enviar:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+            background: linear-gradient(135deg, #1a2940 0%, #23395d 100%);
+            box-shadow: 0 4px 16px #23395d33;
         }
 
         .btn-enviar:active {
-            transform: translateY(0);
-        }
-
-        .icon {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            margin-right: 8px;
-            vertical-align: middle;
+            background: #23395d;
         }
 
         .required {
-            color: #e74c3c;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 25px;
-                margin: 10px;
-            }
-            
-            .header h1 {
-                font-size: 24px;
-            }
+            color: #c0392b;
         }
 
         .form-row {
@@ -139,6 +184,16 @@
 
         .form-row .form-group {
             flex: 1;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 25px;
+                margin: 90px 10px 0 10px;
+            }
+            .header h1 {
+                font-size: 22px;
+            }
         }
 
         @media (max-width: 600px) {
@@ -151,12 +206,23 @@
         .char-counter {
             text-align: right;
             font-size: 12px;
-            color: #666;
+            color: #4f6d7a;
             margin-top: 5px;
         }
     </style>
 </head>
 <body>
+    <nav>
+        <div class="navbar-content">
+            <span class="navbar-title">Sistema TCC Etec</span>
+            <div class="navbar-links">
+                <a href="reservar_laboratorio.html">Reservar Laboratório</a>
+                <a href="mensagem.html">Mensagens</a>
+                <button onclick="window.location.href='Login.html'">Sair</button>
+            </div>
+        </div>
+    </nav>
+
     <div class="container">
         <div class="header">
             <h1>Enviar Mensagem</h1>
@@ -167,7 +233,6 @@
             <div class="form-row">
                 <div class="form-group">
                     <label for="turma">
-                        
                         Selecionar Turma <span class="required">*</span>
                     </label>
                     <select id="turma" name="turma" class="form-control" required>
@@ -184,7 +249,6 @@
 
                 <div class="form-group">
                     <label for="dataEnvio">
-                        
                         Data de Envio <span class="required">*</span>
                     </label>
                     <input type="datetime-local" id="dataEnvio" name="dataEnvio" class="form-control" required>
@@ -193,7 +257,6 @@
 
             <div class="form-group">
                 <label for="assunto">
-                    
                     Assunto da Mensagem <span class="required">*</span>
                 </label>
                 <input type="text" id="assunto" name="assunto" class="form-control" 
@@ -202,7 +265,6 @@
 
             <div class="form-group">
                 <label for="mensagem">
-        
                     Mensagem <span class="required">*</span>
                 </label>
                 <textarea id="mensagem" name="mensagem" class="form-control" 
@@ -214,29 +276,25 @@
             </div>
 
             <button type="submit" class="btn-enviar">
-                
                 Enviar Mensagem
             </button>
         </form>
     </div>
 
     <script>
-        
         const mensagemTextarea = document.getElementById('mensagem');
         const charCount = document.getElementById('charCount');
 
         mensagemTextarea.addEventListener('input', function() {
             const count = this.value.length;
             charCount.textContent = count;
-            
             if (count > 450) {
-                charCount.style.color = '#e74c3c';
+                charCount.style.color = '#c0392b';
             } else {
-                charCount.style.color = '#666';
+                charCount.style.color = '#4f6d7a';
             }
         });
 
-        
         const dataEnvioInput = document.getElementById('dataEnvio');
         const now = new Date();
         const year = now.getFullYear();
@@ -244,14 +302,11 @@
         const day = String(now.getDate()).padStart(2, '0');
         const hours = String(now.getHours()).padStart(2, '0');
         const minutes = String(now.getMinutes()).padStart(2, '0');
-        
         dataEnvioInput.min = `${year}-${month}-${day}T${hours}:${minutes}`;
         dataEnvioInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
 
-    
         document.getElementById('mensagemForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            
             const turma = document.getElementById('turma').value;
             const dataEnvio = document.getElementById('dataEnvio').value;
             const assunto = document.getElementById('assunto').value;
@@ -262,22 +317,14 @@
                 return;
             }
 
-            
             const btnEnviar = document.querySelector('.btn-enviar');
-            btnEnviar.innerHTML = '<span class="icon">⏳</span>Enviando...';
+            btnEnviar.textContent = 'Enviando...';
             btnEnviar.disabled = true;
 
             setTimeout(() => {
                 alert('Mensagem enviada com sucesso!');
-                btnEnviar.innerHTML = '<span class="icon">🚀</span>Enviar Mensagem';
+                btnEnviar.textContent = 'Enviar Mensagem';
                 btnEnviar.disabled = false;
-                
-                
                 document.getElementById('mensagemForm').reset();
                 charCount.textContent = '0';
-                dataEnvioInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
-            }, 2000);
-        });
-    </script>
-</body>
-</html>
+                dataEnvioInput.value = `${year}-
