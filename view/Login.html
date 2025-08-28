@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -125,7 +126,7 @@
             .login-container {
                 padding: 30px 20px;
             }
-            
+
             .login-header h1 {
                 font-size: 24px;
             }
@@ -150,6 +151,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="login-container">
         <div class="login-header">
@@ -157,32 +159,20 @@
             <p>Faça login para acessar o sistema</p>
         </div>
 
-        <form id="loginForm">
+        <form id="loginForm" name="loginForm" method="post" action="..controler/realize_login.php" novalidate>
             <div class="form-group">
                 <label for="usuario">Usuário</label>
                 <div class="input-wrapper">
-                
-                    <input 
-                        type="text" 
-                        id="usuario" 
-                        name="usuario" 
-                        placeholder="Digite seu usuário"
-                        required
-                    >
+
+                    <input type="text" id="usuario" name="usuario" placeholder="Digite seu usuário" required>
                 </div>
             </div>
 
             <div class="form-group">
                 <label for="senha">Senha</label>
                 <div class="input-wrapper">
-                    
-                    <input 
-                        type="password" 
-                        id="senha" 
-                        name="senha" 
-                        placeholder="Digite sua senha"
-                        required
-                    >
+
+                    <input type="password" id="senha" name="senha" placeholder="Digite sua senha" required>
                 </div>
             </div>
 
@@ -208,16 +198,16 @@
     </div>
 
     <script>
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
+        document.getElementById('loginForm').addEventListener('submit', function (e) {
             e.preventDefault();
-            
+
             const usuario = document.getElementById('usuario').value;
             const senha = document.getElementById('senha').value;
             const tipoUsuario = document.getElementById('tipoUsuario').value;
-            
+
             if (usuario && senha && tipoUsuario) {
                 alert(`Login realizado com sucesso!\nUsuário: ${usuario}\nTipo: ${tipoUsuario}`);
-            
+
 
             } else {
                 alert('Por favor, preencha todos os campos obrigatórios.');
@@ -225,4 +215,5 @@
         });
     </script>
 </body>
+
 </html>
