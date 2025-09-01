@@ -1,3 +1,11 @@
+<?php
+    session_start();
+    if (!isset($_SESSION["id_usuario"])) {
+        header("Location: login.html");
+        exit();
+    }
+?>
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -212,6 +220,13 @@
     </style>
 </head>
 <body>
+    <?php
+    if (isset($_SESSION['error_message'])) {
+        echo "<script>alert('" . $_SESSION['error_message'] . "');</script>";
+        unset($_SESSION['error_message']);
+    }
+    
+    ?>
     <nav>
         <div class="navbar-content">
             <span class="navbar-title">Sistema TCC Etec</span>
@@ -229,7 +244,7 @@
             <p>Comunique-se com suas turmas de forma eficiente</p>
         </div>
 
-        <form id="mensagemForm">
+        <form id="mensagemForm" method="post" action="../controler/save_message.php">
             <div class="form-row">
                 <div class="form-group">
                     <label for="turma">
