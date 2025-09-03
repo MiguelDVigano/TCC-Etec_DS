@@ -1,7 +1,7 @@
 <?php
     session_start();
     if (!isset($_SESSION["id_usuario"])) {
-        header("Location: login.html");
+        header("Location: login.php");
         exit();
     }
 ?>
@@ -225,15 +225,14 @@
         echo "<script>alert('" . $_SESSION['error_message'] . "');</script>";
         unset($_SESSION['error_message']);
     }
-    
     ?>
     <nav>
         <div class="navbar-content">
             <span class="navbar-title">Sistema TCC Etec</span>
             <div class="navbar-links">
-                <a href="reservar_laboratorio.html">Reservar Laboratório</a>
-                <a href="mensagem.html">Mensagens</a>
-                <button onclick="window.location.href='Login.html'">Sair</button>
+                <a href="reservar_laboratorio.php">Reservar Laboratório</a>
+                <a href="mensagem.php">Mensagens</a>
+                <button onclick="window.location.href='login.php'">Sair</button>
             </div>
         </div>
     </nav>
@@ -319,27 +318,6 @@
         const minutes = String(now.getMinutes()).padStart(2, '0');
         dataEnvioInput.min = `${year}-${month}-${day}T${hours}:${minutes}`;
         dataEnvioInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
-
-        document.getElementById('mensagemForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const turma = document.getElementById('turma').value;
-            const dataEnvio = document.getElementById('dataEnvio').value;
-            const assunto = document.getElementById('assunto').value;
-            const mensagem = document.getElementById('mensagem').value;
-
-            if (!turma || !dataEnvio || !assunto || !mensagem) {
-                alert('Por favor, preencha todos os campos obrigatórios.');
-                return;
-            }
-
-            const btnEnviar = document.querySelector('.btn-enviar');
-            btnEnviar.textContent = 'Enviando...';
-            btnEnviar.disabled = true;
-
-            setTimeout(() => {
-                alert('Mensagem enviada com sucesso!');
-                btnEnviar.textContent = 'Enviar Mensagem';
-                btnEnviar.disabled = false;
-                document.getElementById('mensagemForm').reset();
-                charCount.textContent = '0';
-                dataEnvioInput.value = `${year}-
+    </script>
+</body>
+</html>
