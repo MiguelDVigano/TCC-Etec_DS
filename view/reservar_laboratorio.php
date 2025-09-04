@@ -31,7 +31,7 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
             <div class="collapse navbar-collapse" id="navbarProfessor">
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link active fw-bold" href="reserva_de_labs.php"><i class="bi bi-pc-display-horizontal me-1"></i>Laboratórios</a>
+                        <a class="nav-link active fw-bold" href="reservar_laboratorio.php"><i class="bi bi-pc-display-horizontal me-1"></i>Laboratórios</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="mensagem.php"><i class="bi bi-chat-dots me-1"></i>Mensagens</a>
