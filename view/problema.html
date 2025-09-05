@@ -15,6 +15,19 @@
             <h3 class="text-center mb-4">Reportar Defeito</h3>
             
             <form>
+              <!-- Escolher Laboratório -->
+              <div class="mb-3">
+                <label for="laboratorio" class="form-label">Selecione o Laboratório</label>
+                <select class="form-select" id="laboratorio" required>
+                  <option value="" selected disabled>Escolha um laboratório</option>
+                  <option value="lab1">Laboratório 1</option>
+                  <option value="lab2">Laboratório 2</option>
+                  <option value="lab3">Laboratório 3</option>
+                  <option value="lab4">Laboratório 4</option>
+                  <option value="lab5">Laboratório 5</option>
+                </select>
+              </div>
+
               <!-- Upload de imagem -->
               <div class="mb-3">
                 <label for="imagemDefeito" class="form-label">Foto do Defeito</label>
@@ -24,7 +37,7 @@
               <!-- Caixa de texto -->
               <div class="mb-3">
                 <label for="descricaoProblema" class="form-label">Descrição do Problema</label>
-                <textarea class="form-control" id="descricaoProblema" rows="4" placeholder="Descreva o defeito encontrado..."></textarea>
+                <textarea class="form-control" id="descricaoProblema" rows="4" placeholder="Descreva o defeito encontrado..." required></textarea>
               </div>
 
               <!-- Botão -->
