@@ -51,7 +51,7 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
                     <div class="col-md-5 col-lg-4 mb-4">
                         <div class="card border-0 shadow-sm h-100">
                             <div class="card-body">
-                                <h5 class="card-title text-warning fw-bold">
+                                <h5 class="card-title text-dark fw-bold">
                                     <i class="bi bi-door-closed me-2"></i><?= htmlspecialchars($lab['titulo_sala']) ?>
                                 </h5>
                                 <ul class="list-group list-group-flush mb-3">
