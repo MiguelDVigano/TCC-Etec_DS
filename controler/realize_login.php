@@ -21,10 +21,10 @@
         } else if ($tipoUsuario == "Manutencao") {
             header("Location: ../view/dashboard_tecnico.php");
         } else {
-            header("Location: ../view/login.html");
+            header("Location: ../view/Login.html");
         }
         exit();
     } else {
-        header("Location: ../view/login.html");
+        header("Location: ../view/Login.html");
         exit();
     }
