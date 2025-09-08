@@ -293,6 +293,27 @@ INSERT INTO `usuario` (`id_usuario`, `nome`, `email`, `senha_hash`, `tipo_usuari
 (29, 'Manutenção 9', 'manu9@escola.com', 'hash_senha', 'Manutencao', '11977777709', '2025-08-18 12:35:08', '2025-08-18 12:35:08'),
 (30, 'Manutenção 10', 'manu10@escola.com', 'hash_senha', 'Manutencao', '11977777710', '2025-08-18 12:35:08', '2025-08-18 12:35:08');
 
+-- NOVAS TABELAS PARA SISTEMA DE MENSAGENS
+
+CREATE TABLE `mensagem` (
+  `id_mensagem` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `assunto` VARCHAR(100) NOT NULL,
+  `mensagem` TEXT NOT NULL,
+  `data_envio` DATETIME NOT NULL,
+  `id_remetente` INT NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (`id_remetente`) REFERENCES `usuario`(`id_usuario`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE `mensagem_turma` (
+  `id_mensagem` INT NOT NULL,
+  `id_turma` INT NOT NULL,
+  PRIMARY KEY (`id_mensagem`, `id_turma`),
+  FOREIGN KEY (`id_mensagem`) REFERENCES `mensagem`(`id_mensagem`) ON DELETE CASCADE,
+  FOREIGN KEY (`id_turma`) REFERENCES `turma`(`id_turma`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 --
 -- Índices para tabelas despejadas
 --
