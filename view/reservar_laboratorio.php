@@ -92,7 +92,7 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
     <!-- Modal Reserva -->
     <div class="modal fade" id="modalReserva" tabindex="-1" aria-labelledby="modalReservaLabel" aria-hidden="true">
         <div class="modal-dialog">
-            <form class="modal-content border-0 shadow" method="POST" action="../controler/reservar_laboratorio.php" id="formReserva">
+            <form class="modal-content border-0 shadow" method="POST" action="../src/reservar_laboratorio.php" id="formReserva">
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title" id="modalReservaLabel"><i class="bi bi-calendar-plus me-2"></i>Reservar Laboratório</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
@@ -185,7 +185,7 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
                 inputHoraFim.innerHTML = '<option value="">Selecione o início primeiro</option>';
                 return;
             }
-            fetch('../controler/reservar_laboratorio_horarios.php?id_sala=' + idSala + '&data_reserva=' + dataReserva)
+            fetch('../src/reservar_laboratorio_horarios.php?id_sala=' + idSala + '&data_reserva=' + dataReserva)
                 .then(response => response.json())
                 .then(data => {
                     inputHoraInicio.innerHTML = '';
@@ -210,7 +210,7 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
                 inputHoraFim.innerHTML = '<option value="">Selecione o início primeiro</option>';
                 return;
             }
-            fetch('../controler/reservar_laboratorio_horarios.php?id_sala=' + idSala + '&data_reserva=' + dataReserva)
+            fetch('../src/reservar_laboratorio_horarios.php?id_sala=' + idSala + '&data_reserva=' + dataReserva)
                 .then(response => response.json())
                 .then(data => {
                     inputHoraFim.innerHTML = '';
@@ -260,7 +260,7 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
                 inputHoraFim.innerHTML = '<option value="">Selecione o início primeiro</option>';
                 return;
             }
-            fetch('../controler/reservar_laboratorio_horarios.php?id_sala=' + idSala + '&data_reserva=' + dataReserva)
+            fetch('../src/reservar_laboratorio_horarios.php?id_sala=' + idSala + '&data_reserva=' + dataReserva)
                 .then(response => response.json())
                 .then(data => {
                     inputHoraInicio.innerHTML = '';
@@ -285,7 +285,7 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
                 inputHoraFim.innerHTML = '<option value="">Selecione o início primeiro</option>';
                 return;
             }
-            fetch('../controler/reservar_laboratorio_horarios.php?id_sala=' + idSala + '&data_reserva=' + dataReserva)
+            fetch('../src/reservar_laboratorio_horarios.php?id_sala=' + idSala + '&data_reserva=' + dataReserva)
                 .then(response => response.json())
                 .then(data => {
                     inputHoraFim.innerHTML = '';

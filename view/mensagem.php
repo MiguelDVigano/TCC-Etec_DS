@@ -243,7 +243,7 @@
             <p>Comunique-se com suas turmas de forma eficiente</p>
         </div>
 
-        <form id="mensagemForm" method="post" action="../controler/save_message.php">
+        <form id="mensagemForm" method="post" action="../src/save_message.php">
             <div class="form-row">
                 <div class="form-group">
                     <label for="turma">
