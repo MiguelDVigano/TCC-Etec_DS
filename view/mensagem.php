@@ -18,25 +18,23 @@
             padding: 0;
             box-sizing: border-box;
         }
-
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #23395d 0%, #4f6d7a 100%);
             min-height: 100vh;
+            /* Removido o padding-top para subir a navbar */
             padding: 20px;
         }
-
-        nav {
+        .navbar {
             width: 100%;
-            background: linear-gradient(135deg, #23395d 0%, #4f6d7a 100%);
+            background: linear-gradient(135deg, #23395d 0%, #4f6d7a 100%) !important;
+            box-shadow: 0 2px 12px #23395d22 !important;
+            border-radius: 12px !important;
+            margin-bottom: 16px;
             padding: 16px 0;
-            box-shadow: 0 2px 8px #23395d12;
-            position: fixed;
-            top: 0;
-            left: 0;
+            position: relative;
             z-index: 10;
         }
-
         .navbar-content {
             max-width: 1200px;
             margin: 0 auto;
@@ -45,14 +43,12 @@
             justify-content: space-between;
             padding: 0 32px;
         }
-
         .navbar-title {
             color: #fff;
-            font-size: 20px;
+            font-size: 22px;
             font-weight: bold;
             letter-spacing: 1px;
         }
-
         .navbar-links a,
         .navbar-links button {
             color: #fff;
@@ -63,26 +59,41 @@
             background: none;
             border: none;
             cursor: pointer;
-            transition: color 0.2s;
-        }
-
-        .navbar-links a:last-child,
-        .navbar-links button:last-child {
-            margin-right: 0;
-        }
-
-        .navbar-links button {
-            background: #c0392b;
+            transition: color 0.2s, background 0.2s;
+            border-radius: 7px;
             padding: 8px 18px;
-            border-radius: 6px;
+        }
+        .navbar-links a.active {
+            color: #f7c948;
+            font-weight: 700;
+        }
+        .navbar-links a.disabled {
+            color: #bfc9d1;
+            pointer-events: none;
+        }
+        .navbar-links button {
+            background: #bfc9d1;
+            color: #23395d;
             font-weight: 600;
-            transition: background 0.2s;
         }
-
         .navbar-links button:hover {
-            background: #a93226;
+            background: #4f6d7a;
+            color: #fff;
         }
-
+        .navbar-links button.btn-sair {
+            background: #c0392b;
+            color: #fff;
+            font-weight: 600;
+            border: none;
+            border-radius: 7px;
+            padding: 8px 18px;
+            margin-right: 0;
+            transition: background 0.2s, color 0.2s;
+        }
+        .navbar-links button.btn-sair:hover {
+            background: #a93226;
+            color: #fff;
+        }
         .container {
             background: #f7f9fa;
             border-radius: 15px;
@@ -226,16 +237,23 @@
         unset($_SESSION['error_message']);
     }
     ?>
-    <nav>
+    <nav class="navbar">
         <div class="navbar-content">
-            <span class="navbar-title">Sistema TCC Etec</span>
+            <span class="navbar-title">
+                <i class="bi bi-mortarboard-fill" style="color: #f7c948; font-size: 1.3em; margin-right: 12px;"></i>
+                Sistema Escolar Etec
+            </span>
             <div class="navbar-links">
-                <a href="reservar_laboratorio.php">Reservar Laboratório</a>
-                <a href="mensagem.php">Mensagens</a>
-                <button onclick="window.location.href='login.php'">Sair</button>
+                <a href="reservar_laboratorio.php"><i class="bi bi-pc-display-horizontal me-1"></i>Reservar Laboratório</a>
+                <a href="mensagem.php" class="active"><i class="bi bi-chat-dots me-1"></i>Mensagens</a>
+                <a href="problema.html"><i class="bi bi-tools me-1"></i>Enviar Problema</a>
+                <button class="btn-sair" onclick="window.location.href='login.php'">
+                    <i class="bi bi-box-arrow-right me-1"></i>Sair
+                </button>
             </div>
         </div>
     </nav>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
     <div class="container">
         <div class="header">

@@ -16,10 +16,91 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
     <title>Reserva de Laboratórios</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #23395d 0%, #4f6d7a 100%);
+            min-height: 100vh;
+        }
+        .navbar {
+            background: linear-gradient(135deg, #23395d 0%, #4f6d7a 100%) !important;
+            box-shadow: 0 2px 12px #23395d22 !important;
+            border-radius: 12px !important;
+        }
+        .navbar .navbar-brand, .navbar .nav-link, .navbar .navbar-toggler {
+            color: #fff !important;
+        }
+        .navbar .nav-link.active, .navbar .nav-link:focus {
+            color: #f7c948 !important;
+        }
+        .navbar .nav-link.disabled {
+            color: #bfc9d1 !important;
+        }
+        .card, .modal-content {
+            background: #f7f9fa !important;
+            border-radius: 12px !important;
+            box-shadow: 0 4px 24px #23395d33 !important;
+            border: none !important;
+        }
+        .card-title, .modal-title, h2 {
+            color: #23395d !important;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .form-label, .modal-title {
+            color: #23395d !important;
+            font-weight: 500;
+        }
+        .form-control, .form-select, textarea {
+            background-color: #f7f9fa !important;
+            border: 1.5px solid #bfc9d1 !important;
+            border-radius: 7px !important;
+            font-size: 15px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .form-control:focus, .form-select:focus, textarea:focus {
+            outline: none;
+            border-color: #23395d !important;
+            box-shadow: 0 0 0 2px #23395d22 !important;
+            background-color: #fff !important;
+        }
+        .btn-primary, .btn-success {
+            background: linear-gradient(135deg, #23395d 0%, #4f6d7a 100%) !important;
+            color: #fff !important;
+            border: none !important;
+            border-radius: 7px !important;
+            font-size: 16px;
+            font-weight: 600;
+            box-shadow: 0 2px 8px #23395d22;
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+        .btn-primary:hover, .btn-success:hover {
+            background: linear-gradient(135deg, #1a2940 0%, #23395d 100%) !important;
+            box-shadow: 0 4px 16px #23395d33;
+        }
+        .btn-secondary {
+            background: #bfc9d1 !important;
+            color: #23395d !important;
+            border: none !important;
+            border-radius: 7px !important;
+            font-size: 16px;
+            font-weight: 600;
+            box-shadow: 0 2px 8px #23395d22;
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+        .btn-secondary:hover {
+            background: #4f6d7a !important;
+            color: #fff !important;
+        }
+        .alert {
+            border-radius: 7px !important;
+            font-size: 15px;
+            box-shadow: 0 2px 8px #23395d22;
+        }
+    </style>
 </head>
-<body class="bg-light">
+<body>
     <!-- Navbar Bootstrap -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm mb-4">
+    <nav class="navbar navbar-expand-lg bg-body-tertiary shadow-sm mb-4">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="#">
                 <i class="bi bi-mortarboard-fill me-2 fs-3 text-warning"></i>
@@ -43,7 +124,6 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
             </div>
         </div>
     </nav>
-
     <div class="container">
         <div class="row justify-content-center">
             <?php if ($result->num_rows > 0): ?>
@@ -88,14 +168,13 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
             <?php endif; ?>
         </div>
     </div>
-
     <!-- Modal Reserva -->
     <div class="modal fade" id="modalReserva" tabindex="-1" aria-labelledby="modalReservaLabel" aria-hidden="true">
         <div class="modal-dialog">
             <form class="modal-content border-0 shadow" method="POST" action="../src/reservar_laboratorio.php" id="formReserva">
-                <div class="modal-header bg-primary text-white">
+                <div class="modal-header">
                     <h5 class="modal-title" id="modalReservaLabel"><i class="bi bi-calendar-plus me-2"></i>Reservar Laboratório</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
                 <div class="modal-body">
                     <input type="hidden" name="id_sala" id="inputIdSala">
@@ -147,87 +226,11 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
                         <textarea class="form-control" name="observacao" rows="2"></textarea>
                     </div>
                 </div>
-                <div class="modal-footer bg-light">
+                <div class="modal-footer">
                     <button type="submit" class="btn btn-success fw-bold"><i class="bi bi-check-lg me-1"></i>Reservar</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="bi bi-x-lg me-1"></i>Cancelar</button>
                 </div>
             </form>
-        </div>
-    </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.js"></script>
-    <script>
-        var modalReserva = document.getElementById('modalReserva');
-        var inputIdSala = document.getElementById('inputIdSala');
-        var inputTituloSala = document.getElementById('inputTituloSala');
-        var inputDataReserva = document.getElementById('inputDataReserva');
-        var inputHoraInicio = document.getElementById('inputHoraInicio');
-        var inputHoraFim = document.getElementById('inputHoraFim');
-        var reservaBtnStatus = null;
-
-        modalReserva.addEventListener('show.bs.modal', function (event) {
-            var button = event.relatedTarget;
-            var idSala = button.getAttribute('data-id');
-            var tituloSala = button.getAttribute('data-titulo');
-            reservaBtnStatus = button.getAttribute('data-status');
-            inputIdSala.value = idSala;
-            inputTituloSala.value = tituloSala;
-            inputHoraInicio.innerHTML = '<option value="">Selecione a data primeiro</option>';
-            inputHoraFim.innerHTML = '<option value="">Selecione o início primeiro</option>';
-            inputDataReserva.value = '';
-        });
-
-        inputDataReserva.addEventListener('change', function () {
-            var idSala = inputIdSala.value;
-            var dataReserva = inputDataReserva.value;
-            if (!idSala || !dataReserva) {
-                inputHoraInicio.innerHTML = '<option value="">Selecione a data primeiro</option>';
-                inputHoraFim.innerHTML = '<option value="">Selecione o início primeiro</option>';
-                return;
-            }
-            fetch('../src/reservar_laboratorio_horarios.php?id_sala=' + idSala + '&data_reserva=' + dataReserva)
-                .then(response => response.json())
-                .then(data => {
-                    inputHoraInicio.innerHTML = '';
-                    inputHoraFim.innerHTML = '<option value="">Selecione o início primeiro</option>';
-                    if (data.length === 0) {
-                        inputHoraInicio.innerHTML = '<option value="">Todos os horários reservados</option>';
-                    } else {
-                        inputHoraInicio.innerHTML = '<option value="">Selecione</option>';
-                        data.forEach(function (slot) {
-                            var inicio = slot.split('-')[0];
-                            inputHoraInicio.innerHTML += '<option value="' + inicio + '">' + slot + '</option>';
-                        });
-                    }
-                });
-        });
-
-        inputHoraInicio.addEventListener('change', function () {
-            var idSala = inputIdSala.value;
-            var dataReserva = inputDataReserva.value;
-            var horaInicio = inputHoraInicio.value;
-            if (!idSala || !dataReserva || !horaInicio) {
-                inputHoraFim.innerHTML = '<option value="">Selecione o início primeiro</option>';
-                return;
-            }
-            fetch('../src/reservar_laboratorio_horarios.php?id_sala=' + idSala + '&data_reserva=' + dataReserva)
-                .then(response => response.json())
-                .then(data => {
-                    inputHoraFim.innerHTML = '';
-                    var found = false;
-                    data.forEach(function (slot, idx) {
-                        var inicio = slot.split('-')[0];
-                        var fim = slot.split('-')[1];
-                        if (inicio === horaInicio) found = true;
-                        if (found) {
-                            inputHoraFim.innerHTML += '<option value="' + fim + '">' + slot + '</option>';
-                        }
-                    });
-                });
-        });
-    </script>
-</body>
-</html>
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
