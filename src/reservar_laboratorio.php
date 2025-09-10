@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($idx_inicio === -1 || $idx_fim === -1 || $idx_inicio > $idx_fim) {
-        header("Location: ../view/reservar_laboratorio.php?erro_reserva=" . urlencode("Horário inválido selecionado."));
+        header("Location: ../view/professor/reservar_laboratorio.php?erro_reserva=" . urlencode("Horário inválido selecionado."));
         exit;
     }
 
@@ -71,7 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($conflict) {
-        header("Location: ../view/reservar_laboratorio.php?erro_reserva=" . urlencode("Erro: Um ou mais horários já estão reservados."));
+        header("Location: ../view/professor/reservar_laboratorio.php?erro_reserva=" . urlencode("Erro: Um ou mais horários já estão reservados."));
         exit;
     } else {
         // Inserir a reserva com o início do primeiro e fim do último horário
@@ -114,7 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->execute();
             }
 
-            header("Location: ../view/reservar_laboratorio.php?reserva=ok");
+            header("Location: ../view/professor/reservar_laboratorio.php?reserva=ok");
             exit;
         } else {
             echo "Erro ao reservar: " . $conn->error;

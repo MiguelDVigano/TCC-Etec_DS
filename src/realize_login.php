@@ -15,11 +15,11 @@
         $user = $result->fetch_assoc();
         $_SESSION["id_usuario"] = $user["id_usuario"];
         if ($tipoUsuario == "Professor") {
-            header("Location: ../view/reservar_laboratorio.php");
+            header("Location: ../view/professor/reservar_laboratorio.php");
         } else if ($tipoUsuario == "Aluno") {
             header("Location: ../view/dashboard_aluno.php");
         } else if ($tipoUsuario == "Manutencao") {
-            header("Location: ../view/dashboard_tecnico.php");
+            header("Location: ../view/manutencao/manutencao.php");
         } else {
             header("Location: ../view/Login.html");
         }
