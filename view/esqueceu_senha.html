@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Sistema</title>
+    <title>Redefinir Senha - Sistema</title>
     <style>
         * {
             margin: 0;
@@ -33,8 +33,15 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px);}
-            to { opacity: 1; transform: translateY(0);}
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .login-header {
@@ -44,10 +51,9 @@
 
         .login-header h1 {
             color: #23395d;
-            font-size: 26px;
+            font-size: 24px;
             font-weight: 700;
             margin-bottom: 6px;
-            letter-spacing: 0.5px;
         }
 
         .login-header p {
@@ -86,10 +92,6 @@
             background-color: #fff;
         }
 
-        .form-group select {
-            cursor: pointer;
-        }
-
         .login-button {
             width: 100%;
             padding: 13px;
@@ -114,53 +116,36 @@
             background: #23395d;
         }
 
-        .forgot-password {
+        .back-to-login {
             text-align: center;
             margin-top: 18px;
         }
 
-        .forgot-password a {
+        .back-to-login a {
             color: #4f6d7a;
             text-decoration: none;
             font-size: 14px;
             transition: color 0.3s;
         }
 
-        .forgot-password a:hover {
+        .back-to-login a:hover {
             color: #23395d;
             text-decoration: underline;
-        }
-
-        @media (max-width: 480px) {
-            .login-container {
-                padding: 20px 6px;
-            }
-
-            .login-header h1 {
-                font-size: 20px;
-            }
-        }
-
-        .input-wrapper {
-            position: relative;
-        }
-
-        .input-icon {
-            position: absolute;
-            left: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #4f6d7a;
-            font-size: 16px;
-        }
-
-        .input-wrapper input {
-            padding-left: 36px;
         }
 
         .error-message {
             color: #c0392b;
             background: #fbeee6;
+            border-radius: 7px;
+            padding: 7px 10px;
+            margin-bottom: 10px;
+            font-size: 13px;
+            display: none;
+        }
+
+        .success-message {
+            color: #1d6a3a;
+            background: #e6f9ee;
             border-radius: 7px;
             padding: 7px 10px;
             margin-bottom: 10px;
@@ -173,71 +158,71 @@
 <body>
     <div class="login-container">
         <div class="login-header">
-            <h1>Bem-vindo</h1>
-            <p>Faça login para acessar o sistema</p>
+            <h1>Redefinir Senha</h1>
+            <p>Digite sua nova senha abaixo</p>
         </div>
 
         <div class="error-message" id="errorMsg"></div>
+        <div class="success-message" id="successMsg"></div>
 
-        <form id="loginForm" name="loginForm" method="post" action="../src/realize_login.php" novalidate>
+        <form id="resetForm" method="post" action="../src/redefinir_senha.php" novalidate>
             <div class="form-group">
-                <label for="email">E-mail</label>
-                <div class="input-wrapper">
-                    <span class="input-icon">&#9993;</span>
-                    <input type="email" id="email" name="email" placeholder="Digite seu e-mail" required>
-                </div>
+                <label for="novaSenha">Nova Senha</label>
+                <input type="password" id="novaSenha" name="novaSenha" placeholder="Digite a nova senha" required>
             </div>
 
             <div class="form-group">
-                <label for="senha">Senha</label>
-                <div class="input-wrapper">
-                    <span class="input-icon">&#128274;</span>
-                    <input type="password" id="senha" name="senha" placeholder="Digite sua senha" required>
-                </div>
+                <label for="confirmSenha">Confirmar Senha</label>
+                <input type="password" id="confirmSenha" name="confirmSenha" placeholder="Digite novamente a senha" required>
             </div>
 
-            <div class="form-group">
-                <label for="tipoUsuario">Tipo de Usuário</label>
-                <select id="tipoUsuario" name="tipoUsuario" required>
-                    <option value="" disabled selected>Selecione o tipo de usuário</option>
-                    <option value="Professor">Professor</option>
-                    <option value="Aluno">Aluno</option>
-                    <option value="Manutencao">Manutenção</option>
-                </select>
-            </div>
-
-            <button type="submit" class="login-button">
-                Entrar
-            </button>
+            <button type="submit" class="login-button">Alterar Senha</button>
         </form>
 
-        <div class="forgot-password">
-            <a href="esqueceu_senha.html">Esqueceu sua senha?</a>
+        <div class="back-to-login">
+            <a href="login.html">Voltar ao login</a>
         </div>
     </div>
 
     <script>
-        // Interatividade: Validação simples do formulário
-        const loginForm = document.getElementById('loginForm');
+        const resetForm = document.getElementById('resetForm');
         const errorMsg = document.getElementById('errorMsg');
+        const successMsg = document.getElementById('successMsg');
 
-        loginForm.addEventListener('submit', function (e) {
+        resetForm.addEventListener('submit', function (e) {
             errorMsg.style.display = 'none';
-            let email = document.getElementById('email').value.trim();
-            let senha = document.getElementById('senha').value.trim();
-            let tipoUsuario = document.getElementById('tipoUsuario').value;
+            successMsg.style.display = 'none';
 
-            if (!email || !senha || !tipoUsuario) {
+            let novaSenha = document.getElementById('novaSenha').value.trim();
+            let confirmSenha = document.getElementById('confirmSenha').value.trim();
+
+            if (!novaSenha || !confirmSenha) {
                 e.preventDefault();
                 errorMsg.textContent = 'Preencha todos os campos para continuar.';
                 errorMsg.style.display = 'block';
                 return;
             }
 
-            if (!email.match(/^[^@]+@[^@]+\.[^@]+$/)) {
+            if (novaSenha.length < 6) {
                 e.preventDefault();
-                errorMsg.textContent = 'Digite um e-mail válido.';
+                errorMsg.textContent = 'A senha deve ter pelo menos 6 caracteres.';
                 errorMsg.style.display = 'block';
                 return;
             }
+
+            if (novaSenha !== confirmSenha) {
+                e.preventDefault();
+                errorMsg.textContent = 'As senhas não conferem.';
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            // Sucesso fake (até ligar com o PHP no back-end)
+            e.preventDefault();
+            successMsg.textContent = 'Senha alterada com sucesso! Agora você pode fazer login.';
+            successMsg.style.display = 'block';
         });
+    </script>
+</body>
+
+</html>
