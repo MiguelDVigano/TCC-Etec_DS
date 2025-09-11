@@ -4,6 +4,8 @@
         header("Location: ../Login.html");
         exit();
     }
+    include '../../conexao.php';
+    $result_turmas = $conn->query("SELECT id_turma, nome_turma FROM turma ORDER BY nome_turma");
 ?>
 
 <!DOCTYPE html>
@@ -269,12 +271,9 @@
                     </label>
                     <select id="turma" name="turma" class="form-control" required>
                         <option value="">Escolha uma turma...</option>
-                        <option value="1ano-a">1º Ano A</option>
-                        <option value="1ano-b">1º Ano B</option>
-                        <option value="2ano-a">2º Ano A</option>
-                        <option value="2ano-b">2º Ano B</option>
-                        <option value="3ano-a">3º Ano A</option>
-                        <option value="3ano-b">3º Ano B</option>
+                        <?php while($turma = $result_turmas->fetch_assoc()): ?>
+                            <option value="<?= $turma['id_turma'] ?>"><?= htmlspecialchars($turma['nome_turma']) ?></option>
+                        <?php endwhile; ?>
                         <option value="todas">Todas as Turmas</option>
                     </select>
                 </div>
