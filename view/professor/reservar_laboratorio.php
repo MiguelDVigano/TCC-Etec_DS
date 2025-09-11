@@ -125,7 +125,7 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
                         <a class="nav-link" href="mensagem.php"><i class="bi bi-chat-dots me-1"></i>Mensagens</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="problema.html"><i class="bi bi-tools me-1"></i>Enviar Problema</a>
+                        <a class="nav-link" href="problema.php"><i class="bi bi-tools me-1"></i>Enviar Problema</a>
                     </li>
                 </ul>
             </div>

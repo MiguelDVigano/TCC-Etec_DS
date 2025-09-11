@@ -248,7 +248,7 @@
             <div class="navbar-links">
                 <a href="reservar_laboratorio.php"><i class="bi bi-pc-display-horizontal me-1"></i>Reservar Laboratório</a>
                 <a href="mensagem.php" class="active"><i class="bi bi-chat-dots me-1"></i>Mensagens</a>
-                <a href="problema.html"><i class="bi bi-tools me-1"></i>Enviar Problema</a>
+                <a href="problema.php"><i class="bi bi-tools me-1"></i>Enviar Problema</a>
                 <button class="btn-sair" onclick="window.location.href='../Login.html'">
                     <i class="bi bi-box-arrow-right me-1"></i>Sair
                 </button>
