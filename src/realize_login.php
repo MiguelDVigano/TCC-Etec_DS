@@ -17,7 +17,7 @@
         if ($tipoUsuario == "Professor") {
             header("Location: ../view/professor/reservar_laboratorio.php");
         } else if ($tipoUsuario == "Aluno") {
-            header("Location: ../view/dashboard_aluno.php");
+            header("Location: ../view/aluno/mensagem_aluno.php");
         } else if ($tipoUsuario == "Manutencao") {
             header("Location: ../view/manutencao/manutencao.php");
         } else {
