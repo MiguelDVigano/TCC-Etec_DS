@@ -1,84 +1,20 @@
 <?php
-session_start();
-if (!isset($_SESSION["id_usuario"]) || $_SESSION["tipo_usuario"] !== "Aluno") {
-    header("Location: ../Login.html");
-    exit();
-}
-include '../../conexao.php';
+require_once '../../conexao.php';
+require_once '../../functions/auth.php';
+require_once '../../functions/database.php';
+require_once '../../functions/business_logic.php';
+
+// Verificar autenticação
+$usuario = verificarAutenticacao("Aluno");
 
 // Buscar turmas do aluno
-$id_aluno = $_SESSION["id_usuario"];
-$sql_turmas = "SELECT id_turma FROM matricula WHERE id_aluno = $id_aluno";
-$result_turmas = $conn->query($sql_turmas);
-$turmas = [];
-if ($result_turmas && $result_turmas->num_rows > 0) {
-    while ($row = $result_turmas->fetch_assoc()) {
-        $turmas[] = $row['id_turma'];
-    }
-}
+$turmas = buscarTurmasAluno($conn, $usuario['id_usuario']);
 
 // Filtro de mensagens
 $filtro = $_GET['filtro'] ?? 'nao_lidas'; // padrão: não lidas
 
-$turmas_str = implode(',', $turmas) ?: '0'; // Evitar erro se sem turmas
-
-// Montar SQL conforme filtro
-if ($filtro === 'lidas') {
-    // Mensagens já lidas pelo aluno e ainda válidas (não expiradas)
-    $sql_mensagens = "
-        SELECT m.id_mensagem, m.assunto, m.mensagem, m.data_envio, u.nome AS remetente
-        FROM mensagem m
-        INNER JOIN usuario u ON m.id_remetente = u.id_usuario
-        INNER JOIN mensagem_leitura ml ON ml.id_mensagem = m.id_mensagem AND ml.id_aluno = $id_aluno
-        WHERE (
-            (m.enviar_para_todas = 1 AND mensagem_valida(m.id_mensagem))
-            OR EXISTS (
-                SELECT 1 FROM mensagem_turma mt 
-                WHERE mt.id_mensagem = m.id_mensagem 
-                AND mensagem_valida(m.id_mensagem)
-                AND mt.id_turma IN ($turmas_str)
-            )
-        )
-        ORDER BY m.data_envio DESC
-    ";
-} elseif ($filtro === 'antigas') {
-    // Mensagens antigas (expiradas)
-    $sql_mensagens = "
-        SELECT m.id_mensagem, m.assunto, m.mensagem, m.data_envio, u.nome AS remetente
-        FROM mensagem m
-        INNER JOIN usuario u ON m.id_remetente = u.id_usuario
-        WHERE (
-            (m.enviar_para_todas = 1 AND NOT mensagem_valida(m.id_mensagem))
-            OR EXISTS (
-                SELECT 1 FROM mensagem_turma mt 
-                WHERE mt.id_mensagem = m.id_mensagem 
-                AND NOT mensagem_valida(m.id_mensagem)
-                AND mt.id_turma IN ($turmas_str)
-            )
-        )
-        ORDER BY m.data_envio DESC
-    ";
-} else {
-    // Mensagens não lidas e válidas (não expiradas)
-    $sql_mensagens = "
-        SELECT m.id_mensagem, m.assunto, m.mensagem, m.data_envio, u.nome AS remetente
-        FROM mensagem m
-        INNER JOIN usuario u ON m.id_remetente = u.id_usuario
-        LEFT JOIN mensagem_leitura ml ON ml.id_mensagem = m.id_mensagem AND ml.id_aluno = $id_aluno
-        WHERE (
-            (m.enviar_para_todas = 1 AND mensagem_valida(m.id_mensagem))
-            OR EXISTS (
-                SELECT 1 FROM mensagem_turma mt 
-                WHERE mt.id_mensagem = m.id_mensagem 
-                AND mensagem_valida(m.id_mensagem)
-                AND mt.id_turma IN ($turmas_str)
-            )
-        )
-        AND ml.id_leitura IS NULL
-        ORDER BY m.data_envio DESC
-    ";
-}
-$result_mensagens = $conn->query($sql_mensagens);
+// Buscar mensagens baseado no filtro
+$result_mensagens = buscarMensagensAluno($conn, $usuario['id_usuario'], $turmas, $filtro);
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -215,11 +151,7 @@ $result_mensagens = $conn->query($sql_mensagens);
     <!-- Conteúdo Principal -->
     <div class="container py-5">
         <h3 class="text-center mb-5"><i class="bi bi-chat-dots me-2"></i>
-            <?php
-                if ($filtro === 'lidas') echo "Mensagens já lidas";
-                elseif ($filtro === 'antigas') echo "Mensagens antigas";
-                else echo "Suas Mensagens Não Lidas";
-            ?>
+            <?php echo obterTituloMensagens($filtro); ?>
         </h3>
         <div class="row g-4">
             <?php if ($result_mensagens && $result_mensagens->num_rows > 0): ?>

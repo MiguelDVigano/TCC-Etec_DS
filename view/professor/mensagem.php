@@ -1,42 +1,22 @@
 <?php
-session_start();
+require_once '../../conexao.php';
+require_once '../../functions/auth.php';
+require_once '../../functions/database.php';
+require_once '../../functions/business_logic.php';
+require_once '../../functions/html_helpers.php';
 
-if (!isset($_SESSION["id_usuario"]) || $_SESSION["tipo_usuario"] !== "Professor") {
-    header("Location: ../Login.html");
-    exit();
-}
-
-include '../../conexao.php';
+// Verificar autenticação
+$usuario = verificarAutenticacao("Professor");
 
 // Busca as turmas para o dropdown de seleção
-$sql_turmas = "SELECT id_turma, nome_turma FROM turma ORDER BY nome_turma";
-$result_turmas = $conn->query($sql_turmas);
+$result_turmas = buscarTurmas($conn);
 
-// --- INÍCIO: Adicionar filtros de pesquisa ---
+// Adicionar filtros de pesquisa
 $filtro_assunto = isset($_GET['filtro_assunto']) ? trim($_GET['filtro_assunto']) : '';
 $filtro_data = isset($_GET['filtro_data']) ? trim($_GET['filtro_data']) : '';
 
-$id_remetente = $_SESSION["id_usuario"];
-$where = "m.id_remetente = $id_remetente";
-if ($filtro_assunto !== '') {
-    $where .= " AND m.assunto LIKE '%" . $conn->real_escape_string($filtro_assunto) . "%'";
-}
-if ($filtro_data !== '') {
-    $where .= " AND DATE(m.data_envio) = '" . $conn->real_escape_string($filtro_data) . "'";
-}
-
-$sql_mensagens_enviadas = "
-    SELECT m.assunto, m.mensagem, m.data_envio,
-           (SELECT GROUP_CONCAT(t.nome_turma SEPARATOR ', ')
-            FROM mensagem_turma mt
-            JOIN turma t ON mt.id_mensagem = m.id_mensagem
-            WHERE mt.id_mensagem = m.id_mensagem) AS turmas_destinatarias
-    FROM mensagem m
-    WHERE $where
-    ORDER BY m.data_envio DESC
-";
-$result_mensagens_enviadas = $conn->query($sql_mensagens_enviadas);
-// --- FIM: Adicionar filtros de pesquisa ---
+// Buscar mensagens enviadas
+$result_mensagens_enviadas = buscarMensagensEnviadas($conn, $usuario['id_usuario'], $filtro_assunto, $filtro_data);
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -202,13 +182,7 @@ $result_mensagens_enviadas = $conn->query($sql_mensagens_enviadas);
                             <div class="mb-3">
                                 <label for="turmas" class="form-label">Turmas Destinatárias</label>
                                 <select class="form-select" id="turmas" name="turmas[]" multiple>
-                                    <?php
-                                    if ($result_turmas && $result_turmas->num_rows > 0) {
-                                        while ($turma = $result_turmas->fetch_assoc()) {
-                                            echo '<option value="' . $turma['id_turma'] . '">' . htmlspecialchars($turma['nome_turma']) . '</option>';
-                                        }
-                                    }
-                                    ?>
+                                    <?php echo gerarOptionsTurmas($result_turmas); ?>
                                 </select>
                                 <div class="form-text mt-2">Segure Ctrl (ou Cmd no Mac) para selecionar múltiplas turmas.</div>
                             </div>

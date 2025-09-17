@@ -1,20 +1,18 @@
 <?php
-session_start();
+require_once '../../conexao.php';
+require_once '../../functions/auth.php';
+require_once '../../functions/database.php';
+require_once '../../functions/html_helpers.php';
 
-if (!isset($_SESSION["id_usuario"]) || $_SESSION["tipo_usuario"] !== "Professor") {
-    header("Location: ../Login.html");
-    exit();
-}
-
-include '../../conexao.php';
+// Verificar autenticação
+$usuario = verificarAutenticacao("Professor");
 
 // Buscar laboratórios
-$sql = "SELECT * FROM sala";
-$result = $conn->query($sql);
+$result = buscarSalasCompletas($conn);
 
 // Buscar turmas e professores para o formulário
-$turmas = $conn->query("SELECT id_turma, nome_turma FROM turma");
-$professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuario WHERE tipo_usuario = 'Professor'");
+$turmas = buscarTurmas($conn);
+$professores = buscarProfessores($conn);
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -149,15 +147,7 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
                                     <li class="list-group-item"><strong>Capacidade:</strong> <?= $lab['capacidade'] ?> alunos</li>
                                     <li class="list-group-item">
                                         <strong>Status:</strong>
-                                        <?php
-                                        if ($lab['status_sala'] === 'Ativa') {
-                                            echo '<span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Ativo</span>';
-                                        } else if ($lab['status_sala'] === 'Ocupado') {
-                                            echo '<span class="badge bg-danger"><i class="bi bi-exclamation-circle me-1"></i>Ocupado</span>';
-                                        } else {
-                                            echo '<span class="badge bg-secondary"><i class="bi bi-x-circle me-1"></i>Inativo</span>';
-                                        }
-                                        ?>
+                                        <?php echo gerarBadgeStatusSala($lab['status_sala']); ?>
                                     </li>
                                 </ul>
                                 <button class="btn btn-primary w-100 fw-bold" data-bs-toggle="modal" data-bs-target="#modalReserva"
@@ -212,23 +202,13 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
                         <label for="inputTurma" class="form-label fw-bold">Turma</label>
                         <select class="form-select" name="id_turma" required>
                             <option value="">Selecione</option>
-                            <?php
-                            $turmas->data_seek(0);
-                            while ($turma = $turmas->fetch_assoc()): ?>
-                                <option value="<?= $turma['id_turma'] ?>"><?= htmlspecialchars($turma['nome_turma']) ?>
-                                </option>
-                            <?php endwhile; ?>
+                            <?php echo gerarOptionsTurmas($turmas); ?>
                         </select>
                     </div>
                     <div class="mb-3">
                         <label for="inputProfessor" class="form-label fw-bold">Professor</label>
                         <select class="form-select" name="id_professor" required>
-                            <option value="">Selecione</option>
-                            <?php
-                            $professores->data_seek(0);
-                            while ($prof = $professores->fetch_assoc()): ?>
-                                <option value="<?= $prof['id_professor'] ?>"><?= htmlspecialchars($prof['nome']) ?></option>
-                            <?php endwhile; ?>
+                            <?php echo gerarOptionsProfessores($professores); ?>
                         </select>
                     </div>
                     <div class="mb-3">

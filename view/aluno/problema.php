@@ -1,14 +1,14 @@
 <?php
-session_start();
-if (!isset($_SESSION["id_usuario"]) || $_SESSION["tipo_usuario"] !== "Aluno") {
-    header("Location: ../Login.html");
-    exit();
-}
-
 require_once '../../conexao.php';
+require_once '../../functions/auth.php';
+require_once '../../functions/database.php';
+require_once '../../functions/html_helpers.php';
 
-$sql = "SELECT id_sala, titulo_sala FROM sala order by titulo_sala";
-$result = $conn->query($sql);
+// Verificar autenticação
+$usuario = verificarAutenticacao("Aluno");
+
+// Buscar salas
+$result = buscarSalas($conn);
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -159,14 +159,7 @@ $result = $conn->query($sql);
               <div class="mb-3">
                 <label for="laboratorio" class="form-label">Selecione o Laboratório</label>
                 <select class="form-select" id="laboratorio" name="id_sala" required>
-                  <option value="" selected disabled>Escolha um laboratório</option>
-                  <?php
-                  if ($result && $result->num_rows > 0) {
-                    while ($row = $result->fetch_assoc()) {
-                      echo '<option value="' . $row['id_sala'] . '">' . htmlspecialchars($row['titulo_sala']) . '</option>';
-                    }
-                  }
-                  ?>
+                  <?php echo gerarOptionsSalas($result); ?>
                 </select>
               </div>
               <div class="mb-3">

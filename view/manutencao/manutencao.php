@@ -1,20 +1,13 @@
 <?php
-session_start();
-if (!isset($_SESSION["id_usuario"]) || $_SESSION["tipo_usuario"] !== "Manutencao") {
-    header("Location: ../Login.html");
-    exit();
-}
-
-
 require_once '../../conexao.php';
+require_once '../../functions/auth.php';
+require_once '../../functions/database.php';
+
+// Verificar autenticação
+$usuario = verificarAutenticacao("Manutencao");
 
 // Busca todos os chamados com informações da sala e status Aberto
-$sql = "SELECT c.id_chamado, c.titulo_chamado, c.descricao, c.url_foto, s.titulo_sala, c.status_chamado 
-        FROM chamado c
-        INNER JOIN sala s ON c.id_sala = s.id_sala
-        WHERE c.status_chamado = 'Aberto' OR c.status_chamado = 'Em Andamento'
-        ORDER BY c.data_chamado DESC, c.id_chamado DESC";
-$result = $conn->query($sql);
+$result = buscarChamadosAbertos($conn);
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
