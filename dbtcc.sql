@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 17, 2025 at 08:29 PM
+-- Generation Time: Sep 17, 2025 at 08:41 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -28,13 +28,13 @@ DELIMITER $$
 CREATE DEFINER=`root`@`localhost` FUNCTION `mensagem_valida` (`idMsg` INT) RETURNS TINYINT(1) DETERMINISTIC BEGIN
     DECLARE expira DATETIME;
 
-    SELECT data_envio 
+    SELECT data_expiracao 
     INTO expira
     FROM mensagem
     WHERE id_mensagem = idMsg;
 
-    -- Retorna TRUE se a mensagem ainda não expirou
-    RETURN (expira >= NOW());
+    -- Retorna TRUE se não expirou ou se não tiver data de expiração
+    RETURN (expira IS NULL OR expira > NOW());
 END$$
 
 DELIMITER ;
@@ -91,23 +91,26 @@ CREATE TABLE `mensagem` (
   `id_remetente` int(11) NOT NULL,
   `enviar_para_todas` tinyint(1) NOT NULL DEFAULT 0,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `data_expiracao` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `mensagem`
 --
 
-INSERT INTO `mensagem` (`id_mensagem`, `assunto`, `mensagem`, `data_envio`, `id_remetente`, `enviar_para_todas`, `created_at`, `updated_at`) VALUES
-(1, 'Mensagem de Teste', 'djahhgsdiwagdopwa', '2025-09-15 17:59:00', 2, 0, '2025-09-11 17:59:22', '2025-09-11 17:59:22'),
-(2, 'Mensagem para todos', 'teste de mensagem para todas as turmas', '2025-09-18 14:59:00', 2, 1, '2025-09-11 17:59:59', '2025-09-11 17:59:59'),
-(3, 'Aviso de Reunião Antiga', 'Reunião que já aconteceu em agosto.', '2025-08-10 14:00:00', 1, 1, '2025-09-17 18:09:32', '2025-09-17 18:09:32'),
-(4, 'Manutenção Finalizada', 'Manutenção concluída em setembro.', '2025-09-01 09:00:00', 1, 1, '2025-09-17 18:09:32', '2025-09-17 18:09:32'),
-(5, 'Evento Encerrado', 'O evento da semana passada já foi realizado.', '2025-09-12 18:00:00', 1, 1, '2025-09-17 18:09:32', '2025-09-17 18:09:32'),
-(6, 'Aviso de Prova', 'A prova será no dia 25 de setembro.', '2025-09-25 10:00:00', 1, 1, '2025-09-17 18:09:32', '2025-09-17 18:09:32'),
-(7, 'Vacinação Obrigatória', 'Campanha de vacinação até outubro.', '2025-10-05 08:00:00', 1, 1, '2025-09-17 18:09:32', '2025-09-17 18:09:32'),
-(8, 'Encontro de Pais', 'Reunião de pais marcada para novembro.', '2025-11-15 19:00:00', 1, 1, '2025-09-17 18:09:32', '2025-09-17 18:09:32'),
-(9, 'Férias Escolares', 'Aviso de férias escolares em dezembro.', '2025-12-20 00:00:00', 1, 1, '2025-09-17 18:09:32', '2025-09-17 18:09:32');
+INSERT INTO `mensagem` (`id_mensagem`, `assunto`, `mensagem`, `data_envio`, `id_remetente`, `enviar_para_todas`, `created_at`, `updated_at`, `data_expiracao`) VALUES
+(1, 'Mensagem de Teste', 'djahhgsdiwagdopwa', '2025-09-15 17:59:00', 2, 0, '2025-09-11 17:59:22', '2025-09-11 17:59:22', NULL),
+(2, 'Mensagem para todos', 'teste de mensagem para todas as turmas', '2025-09-18 14:59:00', 2, 1, '2025-09-11 17:59:59', '2025-09-11 17:59:59', NULL),
+(3, 'Aviso de Reunião Antiga', 'Reunião que já aconteceu em agosto.', '2025-08-10 14:00:00', 1, 1, '2025-09-17 18:09:32', '2025-09-17 18:09:32', NULL),
+(4, 'Manutenção Finalizada', 'Manutenção concluída em setembro.', '2025-09-01 09:00:00', 1, 1, '2025-09-17 18:09:32', '2025-09-17 18:09:32', NULL),
+(5, 'Evento Encerrado', 'O evento da semana passada já foi realizado.', '2025-09-12 18:00:00', 1, 1, '2025-09-17 18:09:32', '2025-09-17 18:09:32', NULL),
+(6, 'Aviso de Prova', 'A prova será no dia 25 de setembro.', '2025-09-25 10:00:00', 1, 1, '2025-09-17 18:09:32', '2025-09-17 18:09:32', NULL),
+(7, 'Vacinação Obrigatória', 'Campanha de vacinação até outubro.', '2025-10-05 08:00:00', 1, 1, '2025-09-17 18:09:32', '2025-09-17 18:09:32', NULL),
+(8, 'Encontro de Pais', 'Reunião de pais marcada para novembro.', '2025-11-15 19:00:00', 1, 1, '2025-09-17 18:09:32', '2025-09-17 18:09:32', NULL),
+(9, 'Férias Escolares', 'Aviso de férias escolares em dezembro.', '2025-12-20 00:00:00', 1, 1, '2025-09-17 18:09:32', '2025-09-17 18:09:32', NULL),
+(10, 'Não terá aula amnhã', 'A escola está sem água', '2025-09-17 15:36:12', 2, 1, '2025-09-17 18:36:12', '2025-09-17 18:36:12', NULL),
+(11, 'Falta de água', 'amanhã não terá aula devido a falta de água', '2025-09-17 15:40:38', 1, 1, '2025-09-17 18:40:38', '2025-09-17 18:40:38', NULL);
 
 -- --------------------------------------------------------
 
@@ -127,7 +130,8 @@ CREATE TABLE `mensagem_leitura` (
 --
 
 INSERT INTO `mensagem_leitura` (`id_leitura`, `id_mensagem`, `id_aluno`, `data_leitura`) VALUES
-(1, 9, 1, '2025-09-17 15:28:18');
+(1, 9, 1, '2025-09-17 15:28:18'),
+(10, 7, 1, '2025-09-17 15:31:50');
 
 -- --------------------------------------------------------
 
@@ -165,6 +169,14 @@ CREATE TABLE `reserva` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `reserva`
+--
+
+INSERT INTO `reserva` (`id_reserva`, `data_reserva`, `hora_inicio`, `hora_fim`, `id_professor`, `id_sala`, `id_turma`, `observacao`, `created_at`, `updated_at`) VALUES
+(1, '2025-09-24', '08:50:00', '11:40:00', 6, 5, 5, 'Palestra de educação financeira', '2025-09-17 18:34:48', '2025-09-17 18:34:48'),
+(2, '2025-09-24', '08:00:00', '08:50:00', 2, 5, 2, 'aswefaf', '2025-09-17 18:35:22', '2025-09-17 18:35:22');
 
 -- --------------------------------------------------------
 
@@ -353,19 +365,19 @@ ALTER TABLE `matricula`
 -- AUTO_INCREMENT for table `mensagem`
 --
 ALTER TABLE `mensagem`
-  MODIFY `id_mensagem` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id_mensagem` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `mensagem_leitura`
 --
 ALTER TABLE `mensagem_leitura`
-  MODIFY `id_leitura` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id_leitura` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `reserva`
 --
 ALTER TABLE `reserva`
-  MODIFY `id_reserva` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_reserva` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `sala`

@@ -12,11 +12,17 @@ $mensagem = $_POST['mensagem'];
 $id_remetente = $_SESSION['id_usuario'];
 $enviar_para_todas = isset($_POST['enviar_para_todas']) && $_POST['enviar_para_todas'] == '1' ? 1 : 0;
 $turmas = isset($_POST['turmas']) ? $_POST['turmas'] : [];
+$data_expiracao = $_POST['data_expiracao'] ?? null;
+if ($data_expiracao) {
+    $data_expiracao = date('Y-m-d H:i:s', strtotime($data_expiracao));
+} else {
+    $data_expiracao = null; // ou defina um valor padrão, se necessário
+}
 
 // Inserir mensagem na tabela mensagem
-$sql = "INSERT INTO mensagem (assunto, mensagem, data_envio, id_remetente, enviar_para_todas) VALUES (?, ?, NOW(), ?, ?)";
+$sql = "INSERT INTO mensagem (assunto, mensagem, data_envio, id_remetente, enviar_para_todas, data_expiracao) VALUES (?, ?, NOW(), ?, ?, ?)";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("ssii", $assunto, $mensagem, $id_remetente, $enviar_para_todas);
+$stmt->bind_param("ssiis", $assunto, $mensagem, $id_remetente, $enviar_para_todas, $data_expiracao);
 
 if ($stmt->execute()) {
     $id_mensagem = $stmt->insert_id;

@@ -24,17 +24,18 @@ $turmas_str = implode(',', $turmas) ?: '0'; // Evitar erro se sem turmas
 
 // Montar SQL conforme filtro
 if ($filtro === 'lidas') {
-    // Mensagens já lidas pelo aluno
+    // Mensagens já lidas pelo aluno e ainda válidas (não expiradas)
     $sql_mensagens = "
         SELECT m.id_mensagem, m.assunto, m.mensagem, m.data_envio, u.nome AS remetente
         FROM mensagem m
         INNER JOIN usuario u ON m.id_remetente = u.id_usuario
         INNER JOIN mensagem_leitura ml ON ml.id_mensagem = m.id_mensagem AND ml.id_aluno = $id_aluno
         WHERE (
-            m.enviar_para_todas = 1 and mensagem_valida(m.id_mensagem)
+            (m.enviar_para_todas = 1 AND mensagem_valida(m.id_mensagem))
             OR EXISTS (
                 SELECT 1 FROM mensagem_turma mt 
-                WHERE mt.id_mensagem = m.id_mensagem and mensagem_valida(m.id_mensagem)
+                WHERE mt.id_mensagem = m.id_mensagem 
+                AND mensagem_valida(m.id_mensagem)
                 AND mt.id_turma IN ($turmas_str)
             )
         )
@@ -47,27 +48,29 @@ if ($filtro === 'lidas') {
         FROM mensagem m
         INNER JOIN usuario u ON m.id_remetente = u.id_usuario
         WHERE (
-            m.enviar_para_todas = 1 and NOT mensagem_valida(m.id_mensagem)
+            (m.enviar_para_todas = 1 AND NOT mensagem_valida(m.id_mensagem))
             OR EXISTS (
                 SELECT 1 FROM mensagem_turma mt 
-                WHERE mt.id_mensagem = m.id_mensagem and NOT mensagem_valida(m.id_mensagem)
+                WHERE mt.id_mensagem = m.id_mensagem 
+                AND NOT mensagem_valida(m.id_mensagem)
                 AND mt.id_turma IN ($turmas_str)
             )
         )
         ORDER BY m.data_envio DESC
     ";
 } else {
-    // Mensagens não lidas e válidas
+    // Mensagens não lidas e válidas (não expiradas)
     $sql_mensagens = "
         SELECT m.id_mensagem, m.assunto, m.mensagem, m.data_envio, u.nome AS remetente
         FROM mensagem m
         INNER JOIN usuario u ON m.id_remetente = u.id_usuario
         LEFT JOIN mensagem_leitura ml ON ml.id_mensagem = m.id_mensagem AND ml.id_aluno = $id_aluno
         WHERE (
-            (m.enviar_para_todas = 1 and mensagem_valida(m.id_mensagem))
+            (m.enviar_para_todas = 1 AND mensagem_valida(m.id_mensagem))
             OR EXISTS (
                 SELECT 1 FROM mensagem_turma mt 
-                WHERE mt.id_mensagem = m.id_mensagem and mensagem_valida(m.id_mensagem)
+                WHERE mt.id_mensagem = m.id_mensagem 
+                AND mensagem_valida(m.id_mensagem)
                 AND mt.id_turma IN ($turmas_str)
             )
         )

@@ -196,6 +196,10 @@ $result_mensagens_enviadas = $conn->query($sql_mensagens_enviadas);
                                 <textarea class="form-control" id="mensagem" name="mensagem" rows="5" required></textarea>
                             </div>
                             <div class="mb-3">
+                                <label for="data_expiracao" class="form-label">Data de Expiração</label>
+                                <input type="datetime-local" class="form-control" id="data_expiracao" name="data_expiracao" required>
+                            </div>
+                            <div class="mb-3">
                                 <label for="turmas" class="form-label">Turmas Destinatárias</label>
                                 <select class="form-select" id="turmas" name="turmas[]" multiple>
                                     <?php
