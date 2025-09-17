@@ -17,20 +17,64 @@ if ($result_turmas && $result_turmas->num_rows > 0) {
     }
 }
 
-// Buscar mensagens relevantes: para todas ou para as turmas do aluno
+// Filtro de mensagens
+$filtro = $_GET['filtro'] ?? 'nao_lidas'; // padrão: não lidas
+
 $turmas_str = implode(',', $turmas) ?: '0'; // Evitar erro se sem turmas
-$sql_mensagens = "
-    SELECT m.id_mensagem, m.assunto, m.mensagem, m.data_envio, u.nome AS remetente
-    FROM mensagem m
-    INNER JOIN usuario u ON m.id_remetente = u.id_usuario
-    WHERE m.enviar_para_todas = 1
-    OR EXISTS (
-        SELECT 1 FROM mensagem_turma mt 
-        WHERE mt.id_mensagem = m.id_mensagem 
-        AND mt.id_turma IN ($turmas_str)
-    )
-    ORDER BY m.data_envio DESC
-";
+
+// Montar SQL conforme filtro
+if ($filtro === 'lidas') {
+    // Mensagens já lidas pelo aluno
+    $sql_mensagens = "
+        SELECT m.id_mensagem, m.assunto, m.mensagem, m.data_envio, u.nome AS remetente
+        FROM mensagem m
+        INNER JOIN usuario u ON m.id_remetente = u.id_usuario
+        INNER JOIN mensagem_leitura ml ON ml.id_mensagem = m.id_mensagem AND ml.id_aluno = $id_aluno
+        WHERE (
+            m.enviar_para_todas = 1 and mensagem_valida(m.id_mensagem)
+            OR EXISTS (
+                SELECT 1 FROM mensagem_turma mt 
+                WHERE mt.id_mensagem = m.id_mensagem and mensagem_valida(m.id_mensagem)
+                AND mt.id_turma IN ($turmas_str)
+            )
+        )
+        ORDER BY m.data_envio DESC
+    ";
+} elseif ($filtro === 'antigas') {
+    // Mensagens antigas (expiradas)
+    $sql_mensagens = "
+        SELECT m.id_mensagem, m.assunto, m.mensagem, m.data_envio, u.nome AS remetente
+        FROM mensagem m
+        INNER JOIN usuario u ON m.id_remetente = u.id_usuario
+        WHERE (
+            m.enviar_para_todas = 1 and NOT mensagem_valida(m.id_mensagem)
+            OR EXISTS (
+                SELECT 1 FROM mensagem_turma mt 
+                WHERE mt.id_mensagem = m.id_mensagem and NOT mensagem_valida(m.id_mensagem)
+                AND mt.id_turma IN ($turmas_str)
+            )
+        )
+        ORDER BY m.data_envio DESC
+    ";
+} else {
+    // Mensagens não lidas e válidas
+    $sql_mensagens = "
+        SELECT m.id_mensagem, m.assunto, m.mensagem, m.data_envio, u.nome AS remetente
+        FROM mensagem m
+        INNER JOIN usuario u ON m.id_remetente = u.id_usuario
+        LEFT JOIN mensagem_leitura ml ON ml.id_mensagem = m.id_mensagem AND ml.id_aluno = $id_aluno
+        WHERE (
+            (m.enviar_para_todas = 1 and mensagem_valida(m.id_mensagem))
+            OR EXISTS (
+                SELECT 1 FROM mensagem_turma mt 
+                WHERE mt.id_mensagem = m.id_mensagem and mensagem_valida(m.id_mensagem)
+                AND mt.id_turma IN ($turmas_str)
+            )
+        )
+        AND ml.id_leitura IS NULL
+        ORDER BY m.data_envio DESC
+    ";
+}
 $result_mensagens = $conn->query($sql_mensagens);
 ?>
 <!DOCTYPE html>
@@ -107,6 +151,16 @@ $result_mensagens = $conn->query($sql_mensagens);
             color: #f7c948 !important;
             font-weight: 700;
         }
+        .filtro-mensagens {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            margin-bottom: 32px;
+        }
+        .filtro-mensagens label {
+            font-weight: 600;
+            color: #fdfdfd;
+        }
     </style>
 </head>
 <body>
@@ -136,9 +190,34 @@ $result_mensagens = $conn->query($sql_mensagens);
         </div>
     </nav>
 
+    <!-- Filtro de mensagens -->
+    <div class="container">
+        <form method="get" class="filtro-mensagens mb-4">
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="filtro" id="filtro_nao_lidas" value="nao_lidas" <?php if($filtro==='nao_lidas') echo 'checked'; ?>>
+                <label class="form-check-label" for="filtro_nao_lidas">Não lidas</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="filtro" id="filtro_lidas" value="lidas" <?php if($filtro==='lidas') echo 'checked'; ?>>
+                <label class="form-check-label" for="filtro_lidas">Já lidas</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="filtro" id="filtro_antigas" value="antigas" <?php if($filtro==='antigas') echo 'checked'; ?>>
+                <label class="form-check-label" for="filtro_antigas">Antigas</label>
+            </div>
+            <button type="submit" class="btn btn-primary ms-3">Filtrar</button>
+        </form>
+    </div>
+
     <!-- Conteúdo Principal -->
     <div class="container py-5">
-        <h3 class="text-center mb-5"><i class="bi bi-chat-dots me-2"></i>Suas Mensagens</h3>
+        <h3 class="text-center mb-5"><i class="bi bi-chat-dots me-2"></i>
+            <?php
+                if ($filtro === 'lidas') echo "Mensagens já lidas";
+                elseif ($filtro === 'antigas') echo "Mensagens antigas";
+                else echo "Suas Mensagens Não Lidas";
+            ?>
+        </h3>
         <div class="row g-4">
             <?php if ($result_mensagens && $result_mensagens->num_rows > 0): ?>
                 <?php while ($msg = $result_mensagens->fetch_assoc()): ?>
@@ -150,6 +229,14 @@ $result_mensagens = $conn->query($sql_mensagens);
                                 Enviado por: <?php echo htmlspecialchars($msg['remetente']); ?><br>
                                 Data: <?php echo date('d/m/Y H:i', strtotime($msg['data_envio'])); ?>
                             </p>
+                            <?php if($filtro === 'nao_lidas'): ?>
+                            <form action="../../src/marcar_mensagem_lida.php" method="POST">
+                                <input type="hidden" name="id_mensagem" value="<?php echo $msg['id_mensagem']; ?>">
+                                <button type="submit" class="btn btn-success w-100 mt-2">
+                                    <i class="bi bi-check2-circle"></i> Marcar como lida
+                                </button>
+                            </form>
+                            <?php endif; ?>
                         </div>
                     </div>
                 <?php endwhile; ?>
