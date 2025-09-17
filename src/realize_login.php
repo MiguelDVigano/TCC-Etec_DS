@@ -14,6 +14,7 @@
         session_start();
         $user = $result->fetch_assoc();
         $_SESSION["id_usuario"] = $user["id_usuario"];
+        $_SESSION["tipo_usuario"] = $user["tipo_usuario"];
         if ($tipoUsuario == "Professor") {
             header("Location: ../view/professor/reservar_laboratorio.php");
         } else if ($tipoUsuario == "Aluno") {

@@ -1,4 +1,11 @@
 <?php
+session_start();
+if (!isset($_SESSION["id_usuario"]) || $_SESSION["tipo_usuario"] !== "Manutencao") {
+    header("Location: ../Login.html");
+    exit();
+}
+
+
 require_once '../../conexao.php';
 
 // Busca todos os chamados com informações da sala e status Aberto
@@ -94,7 +101,7 @@ $result = $conn->query($sql);
         <i class="bi bi-mortarboard-fill me-2 fs-3" style="color: #fff;"></i>
         <span class="fw-bold">Sistema Escolar Etec</span>
       </a>
-      <button class="btn btn-danger" onclick="window.location.href='../Login.html'">
+      <button class="btn btn-danger" onclick="window.location.href='../../src/logout.php'">
         <i class="bi bi-box-arrow-right me-1"></i> Sair
       </button>
     </div>

@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-if (!isset($_SESSION["id_usuario"])) {
+if (!isset($_SESSION["id_usuario"]) || $_SESSION["tipo_usuario"] !== "Professor") {
     header("Location: ../Login.html");
     exit();
 }
@@ -128,7 +128,7 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
                             <a class="nav-link" href="problema.php"><i class="bi bi-tools me-1"></i>Enviar Problema</a>
                         </li>
                         <li class="nav-item">
-                            <button class="btn btn-danger d-flex align-items-center" onclick="window.location.href='../Login.html'" style="margin-left:12px;"><i class="bi bi-box-arrow-right me-1"></i>Sair</button>
+                            <button class="btn btn-danger d-flex align-items-center" onclick="window.location.href='../../src/logout.php'" style="margin-left:12px;"><i class="bi bi-box-arrow-right me-1"></i>Sair</button>
                         </li>
                     </ul>
                 </div>
