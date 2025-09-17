@@ -5,7 +5,7 @@ require_once '../../conexao.php';
 $sql = "SELECT c.id_chamado, c.titulo_chamado, c.descricao, c.url_foto, s.titulo_sala, c.status_chamado 
         FROM chamado c
         INNER JOIN sala s ON c.id_sala = s.id_sala
-        WHERE c.status_chamado = 'Aberto'
+        WHERE c.status_chamado = 'Aberto' OR c.status_chamado = 'Em Andamento'
         ORDER BY c.data_chamado DESC, c.id_chamado DESC";
 $result = $conn->query($sql);
 ?>
@@ -143,6 +143,13 @@ $result = $conn->query($sql);
               <p><strong>Sala:</strong> <?php echo htmlspecialchars($row['titulo_sala']); ?></p>
               <p><strong>Descrição:</strong> <?php echo nl2br(htmlspecialchars($row['descricao'])); ?></p>
               <?php if ($row['status_chamado'] === 'Aberto'): ?>
+                <form action="../../src/marcar_chamado_andamento.php" method="POST" class="mt-3">
+                  <input type="hidden" name="id_chamado" value="<?php echo $row['id_chamado']; ?>">
+                  <button type="submit" class="btn btn-warning w-100">
+                    <i class="bi bi-arrow-repeat me-1"></i> Marcar como em andamento
+                  </button>
+                </form>
+              <?php elseif ($row['status_chamado'] === 'Em Andamento'): ?>
                 <form action="../../src/marcar_chamado_concluido.php" method="POST" class="mt-3">
                   <input type="hidden" name="id_chamado" value="<?php echo $row['id_chamado']; ?>">
                   <button type="submit" class="btn btn-success w-100">

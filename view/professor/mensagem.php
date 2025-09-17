@@ -12,8 +12,19 @@ include '../../conexao.php';
 $sql_turmas = "SELECT id_turma, nome_turma FROM turma ORDER BY nome_turma";
 $result_turmas = $conn->query($sql_turmas);
 
-// Busca as mensagens enviadas pelo professor logado
+// --- INÍCIO: Adicionar filtros de pesquisa ---
+$filtro_assunto = isset($_GET['filtro_assunto']) ? trim($_GET['filtro_assunto']) : '';
+$filtro_data = isset($_GET['filtro_data']) ? trim($_GET['filtro_data']) : '';
+
 $id_remetente = $_SESSION["id_usuario"];
+$where = "m.id_remetente = $id_remetente";
+if ($filtro_assunto !== '') {
+    $where .= " AND m.assunto LIKE '%" . $conn->real_escape_string($filtro_assunto) . "%'";
+}
+if ($filtro_data !== '') {
+    $where .= " AND DATE(m.data_envio) = '" . $conn->real_escape_string($filtro_data) . "'";
+}
+
 $sql_mensagens_enviadas = "
     SELECT m.assunto, m.mensagem, m.data_envio,
            (SELECT GROUP_CONCAT(t.nome_turma SEPARATOR ', ')
@@ -21,10 +32,11 @@ $sql_mensagens_enviadas = "
             JOIN turma t ON mt.id_mensagem = m.id_mensagem
             WHERE mt.id_mensagem = m.id_mensagem) AS turmas_destinatarias
     FROM mensagem m
-    WHERE m.id_remetente = $id_remetente
+    WHERE $where
     ORDER BY m.data_envio DESC
 ";
 $result_mensagens_enviadas = $conn->query($sql_mensagens_enviadas);
+// --- FIM: Adicionar filtros de pesquisa ---
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -71,7 +83,8 @@ $result_mensagens_enviadas = $conn->query($sql_mensagens_enviadas);
         }
 
         .card-title,
-        h3, h4 {
+        h3,
+        h4 {
             color: #23395d !important;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             font-weight: 700;
@@ -213,6 +226,21 @@ $result_mensagens_enviadas = $conn->query($sql_mensagens_enviadas);
                 <div class="card shadow-lg border-0 rounded-4">
                     <div class="card-body p-4">
                         <h4 class="text-center mb-4"><i class="bi bi-clock-history me-2"></i>Mensagens Enviadas</h4>
+                        <!-- INÍCIO: Formulário de pesquisa -->
+                        <form class="row g-2 mb-3" method="get" action="">
+                            <div class="col-7">
+                                <input type="text" class="form-control" name="filtro_assunto" placeholder="Pesquisar por assunto" value="<?php echo htmlspecialchars($filtro_assunto); ?>">
+                            </div>
+                            <div class="col-4">
+                                <input type="date" class="form-control" name="filtro_data" value="<?php echo htmlspecialchars($filtro_data); ?>">
+                            </div>
+                            <div class="col-1 d-grid">
+                                <button type="submit" class="btn btn-primary" title="Pesquisar">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </div>
+                        </form>
+                        <!-- FIM: Formulário de pesquisa -->
                         <div class="list-group list-group-flush">
                             <?php if ($result_mensagens_enviadas && $result_mensagens_enviadas->num_rows > 0): ?>
                                 <?php while ($msg = $result_mensagens_enviadas->fetch_assoc()): ?>
@@ -238,6 +266,7 @@ $result_mensagens_enviadas = $conn->query($sql_mensagens_enviadas);
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>
 <?php
 $conn->close();
