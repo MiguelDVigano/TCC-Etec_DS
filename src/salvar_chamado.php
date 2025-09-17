@@ -81,11 +81,8 @@ $stmt->bind_param("ssssi", $titulo_chamado, $descricao, $url_foto, $today, $id_s
 $ok = $stmt->execute();
 $stmt->close();
 
-if ($ok) {
-    header("Location: ../view/professor/problema.php?success=1");
-    exit();
-} else {
-    header("Location: ../view/professor/problema.php?error=db");
-    exit();
-}
-?>
+if ($_SESSION['tipo_usuario'] === 'professor') {
+    header("Location: ../view/professor/problema.php");
+} else if ($_SESSION['tipo_usuario'] === 'aluno') {
+    header("Location: ../view/aluno/problema.php");
+};
