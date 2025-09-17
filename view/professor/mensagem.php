@@ -31,7 +31,6 @@ $result_mensagens_enviadas = $conn->query($sql_mensagens_enviadas);
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Enviar Mensagem - Professor</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
@@ -72,8 +71,7 @@ $result_mensagens_enviadas = $conn->query($sql_mensagens_enviadas);
         }
 
         .card-title,
-        h3,
-        h4 {
+        h3, h4 {
             color: #23395d !important;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             font-weight: 700;
@@ -138,44 +136,6 @@ $result_mensagens_enviadas = $conn->query($sql_mensagens_enviadas);
             background: #a93226 !important;
             color: #fff !important;
         }
-
-        /* Responsividade extra para telas pequenas */
-        @media (max-width: 991.98px) {
-            .navbar {
-                border-radius: 0 !important;
-                margin-bottom: 16px;
-            }
-        }
-
-        @media (max-width: 767.98px) {
-            .container.py-5 {
-                padding-top: 2rem !important;
-                padding-bottom: 2rem !important;
-            }
-
-            .card {
-                margin-bottom: 2rem;
-            }
-        }
-
-        @media (max-width: 575.98px) {
-            .navbar .navbar-brand span {
-                font-size: 1rem;
-            }
-
-            .navbar .navbar-brand i {
-                font-size: 1.2rem !important;
-            }
-
-            .card-body {
-                padding: 1rem !important;
-            }
-
-            h3,
-            h4 {
-                font-size: 1.2rem !important;
-            }
-        }
     </style>
 </head>
 
@@ -186,34 +146,30 @@ $result_mensagens_enviadas = $conn->query($sql_mensagens_enviadas);
                 <i class="bi bi-mortarboard-fill me-2 fs-3" style="color: #f7c948;"></i>
                 <span class="fw-bold">Sistema Escolar Etec</span>
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarProfessor"
-                aria-controls="navbarProfessor" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarProfessor" aria-controls="navbarProfessor" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarProfessor">
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link" href="reservar_laboratorio.php"><i class="bi bi-pc-display-horizontal me-1"></i>Laboratórios
-                        </a>
+                        <a class="nav-link" href="reservar_laboratorio.php"><i class="bi bi-pc-display-horizontal me-1"></i>Laboratórios</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active fw-bold" href="mensagem.php"><i class="bi bi-chat-dots me-1"></i>Mensagens
-                        </a>
+                        <a class="nav-link active fw-bold" href="mensagem.php"><i class="bi bi-chat-dots me-1"></i>Mensagens</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="problema.php"><i class="bi bi-tools me-1"></i>Enviar Problema</a>
                     </li>
                     <li class="nav-item">
-                        <button class="btn btn-danger" onclick="window.location.href='../Login.html'"
-                            style="margin-left:12px;"><i class="bi bi-box-arrow-right me-1"></i>Sair</button>
+                        <button class="btn btn-danger" onclick="window.location.href='../Login.html'" style="margin-left:12px;"><i class="bi bi-box-arrow-right me-1"></i>Sair</button>
                     </li>
                 </ul>
             </div>
         </div>
     </nav>
     <div class="container py-5">
-        <div class="row g-4">
-            <div class="col-12 col-md-6 mb-4">
+        <div class="row">
+            <div class="col-md-6 mb-4">
                 <div class="card shadow-lg border-0 rounded-4">
                     <div class="card-body p-4">
                         <h3 class="text-center mb-4"><i class="bi bi-chat-dots me-2"></i>Enviar Mensagem</h3>
@@ -237,12 +193,10 @@ $result_mensagens_enviadas = $conn->query($sql_mensagens_enviadas);
                                     }
                                     ?>
                                 </select>
-                                <div class="form-text mt-2">Segure Ctrl (ou Cmd no Mac) para selecionar múltiplas turmas.
-                                </div>
+                                <div class="form-text mt-2">Segure Ctrl (ou Cmd no Mac) para selecionar múltiplas turmas.</div>
                             </div>
                             <div class="form-check mb-4">
-                                <input class="form-check-input" type="checkbox" name="enviar_para_todas" value="1"
-                                    id="enviarParaTodas">
+                                <input class="form-check-input" type="checkbox" name="enviar_para_todas" value="1" id="enviarParaTodas">
                                 <label class="form-check-label" for="enviarParaTodas">
                                     Enviar para todas as turmas
                                 </label>
@@ -255,26 +209,26 @@ $result_mensagens_enviadas = $conn->query($sql_mensagens_enviadas);
                 </div>
             </div>
 
-            <div class="col-12 col-md-6">
+            <div class="col-md-6">
                 <div class="card shadow-lg border-0 rounded-4">
                     <div class="card-body p-4">
                         <h4 class="text-center mb-4"><i class="bi bi-clock-history me-2"></i>Mensagens Enviadas</h4>
                         <div class="list-group list-group-flush">
                             <?php if ($result_mensagens_enviadas && $result_mensagens_enviadas->num_rows > 0): ?>
-                            <?php while ($msg = $result_mensagens_enviadas->fetch_assoc()): ?>
-                            <div class="list-group-item list-group-item-action mb-2 rounded-3">
-                                <div class="d-flex w-100 justify-content-between">
-                                    <h5 class="mb-1 fw-bold"><?php echo htmlspecialchars($msg['assunto']); ?></h5>
-                                    <small class="text-muted"><?php echo date('d/m/Y H:i', strtotime($msg['data_envio'])); ?></small>
-                                </div>
-                                <p class="mb-1 text-muted"><?php echo nl2br(htmlspecialchars($msg['mensagem'])); ?></p>
-                                <small class="text-secondary">
-                                    **Destinatários:** <?php echo !empty($msg['turmas_destinatarias']) ? htmlspecialchars($msg['turmas_destinatarias']) : 'Todas as turmas'; ?>
-                                </small>
-                            </div>
-                            <?php endwhile; ?>
+                                <?php while ($msg = $result_mensagens_enviadas->fetch_assoc()): ?>
+                                    <div class="list-group-item list-group-item-action mb-2 rounded-3">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h5 class="mb-1 fw-bold"><?php echo htmlspecialchars($msg['assunto']); ?></h5>
+                                            <small class="text-muted"><?php echo date('d/m/Y H:i', strtotime($msg['data_envio'])); ?></small>
+                                        </div>
+                                        <p class="mb-1 text-muted"><?php echo nl2br(htmlspecialchars($msg['mensagem'])); ?></p>
+                                        <small class="text-secondary">
+                                            **Destinatários:** <?php echo !empty($msg['turmas_destinatarias']) ? htmlspecialchars($msg['turmas_destinatarias']) : 'Todas as turmas'; ?>
+                                        </small>
+                                    </div>
+                                <?php endwhile; ?>
                             <?php else: ?>
-                            <div class="alert alert-info text-center">Você ainda não enviou mensagens.</div>
+                                <div class="alert alert-info text-center">Você ainda não enviou mensagens.</div>
                             <?php endif; ?>
                         </div>
                     </div>
@@ -284,7 +238,6 @@ $result_mensagens_enviadas = $conn->query($sql_mensagens_enviadas);
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>
 <?php
 $conn->close();
