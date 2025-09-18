@@ -9,6 +9,14 @@ require_once '../../conexao.php';
 
 $sql = "SELECT id_sala, titulo_sala FROM sala order by titulo_sala";
 $result = $conn->query($sql);
+
+// Lógica para exibir o pop-up após envio do formulário
+$showPopup = false;
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Aqui você pode processar o upload e salvar no banco, se desejar.
+    // Por enquanto, apenas mostra o pop-up.
+    $showPopup = true;
+}
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -120,6 +128,50 @@ $result = $conn->query($sql);
       background: #a93226 !important;
       color: #fff !important;
     }
+
+    .popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #fff;
+      color: #333;
+      padding: 32px 40px;
+      border-radius: 12px;
+      border: 2px solid #222;
+      box-shadow: 0 4px 24px rgba(44, 62, 80, 0.18);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+      z-index: 9999;
+      font-family: Arial, sans-serif;
+      font-size: 1.2rem;
+      text-align: center;
+      min-width: 320px;
+    }
+
+    .popup.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .popup .icon {
+      font-size: 2.5rem;
+      color: #4CAF50;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .popup .title {
+      font-weight: bold;
+      font-size: 1.3rem;
+      margin-bottom: 8px;
+    }
+
+    .popup .subtitle {
+      color: #555;
+      font-size: 1rem;
+    }
   </style>
 </head>
 
@@ -155,7 +207,7 @@ $result = $conn->query($sql);
         <div class="card shadow-lg border-0 rounded-4">
           <div class="card-body p-4">
             <h3 class="text-center mb-4"><i class="bi bi-tools me-2"></i>Reportar Defeito</h3>
-            <form action="../../src/salvar_chamado.php" method="POST" enctype="multipart/form-data">
+            <form action="" method="POST" enctype="multipart/form-data">
               <div class="mb-3">
                 <label for="laboratorio" class="form-label">Selecione o Laboratório</label>
                 <select class="form-select" id="laboratorio" name="id_sala" required>
@@ -186,7 +238,24 @@ $result = $conn->query($sql);
       </div>
     </div>
   </div>
+  <!-- Pop-up de sucesso -->
+  <div id="popup" class="popup<?php if ($showPopup) echo ' show'; ?>">
+    <span class="icon">&#10003;</span>
+    <div class="title">Problema enviado com sucesso!</div>
+    <div class="subtitle">Em breve sua solicitação será analisada e resolvida.</div>
+  </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    <?php if ($showPopup): ?>
+      window.onload = function() {
+        var popup = document.getElementById("popup");
+        popup.classList.add("show");
+        setTimeout(function() {
+          popup.classList.remove("show");
+        }, 3000);
+      }
+    <?php endif; ?>
+  </script>
 </body>
 
 </html>
