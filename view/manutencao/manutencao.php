@@ -26,35 +26,28 @@ $result = $conn->query($sql);
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
   <style>
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #23395d 0%, #4f6d7a 100%);
+      background: linear-gradient(135deg, #23395d 0%, #4f6d7a 100%) !important;
       min-height: 100vh;
     }
 
-    .navbar {
+    .navbar-custom {
       background: linear-gradient(135deg, #23395d 0%, #4f6d7a 100%) !important;
-      box-shadow: 0 2px 12px #23395d22 !important;
-      border-radius: 12px !important;
-      margin-bottom: 32px;
+      border-radius: 12px;
     }
 
-    .navbar .navbar-brand {
+    .navbar-custom .navbar-brand,
+    .navbar-custom .nav-link,
+    .navbar-custom .navbar-toggler {
       color: #fff !important;
-      font-weight: 600;
     }
 
-    .btn-danger {
-      background: #c0392b !important;
-      border: none !important;
-    }
-
-    .btn-danger:hover {
-      background: #a93226 !important;
-    }
-
-    h3 {
+    .navbar-custom .nav-link.active,
+    .navbar-custom .nav-link:focus {
       color: #f7c948 !important;
-      font-weight: 700;
+    }
+
+    .navbar-custom .nav-link.disabled {
+      color: #bfc9d1 !important;
     }
 
     .card {
@@ -69,6 +62,27 @@ $result = $conn->query($sql);
       transform: translateY(-4px);
     }
 
+    .card-title {
+      color: #23395d !important;
+      font-weight: 700;
+    }
+
+    .btn-primary,
+    .btn-success,
+    .btn-warning {
+      border-radius: 7px !important;
+      font-weight: 600;
+    }
+
+    .btn-danger {
+      border-radius: 7px !important;
+    }
+
+    h3 {
+      color: #23395d !important;
+      font-weight: 700;
+    }
+
     .img-thumb {
       width: 100%;
       height: 160px;
@@ -77,31 +91,18 @@ $result = $conn->query($sql);
       border: 1px solid #ccc;
       margin-bottom: 10px;
     }
-
-    /* Botão Visualizar Chamado - padrão Bootstrap */
-    .card .btn-primary {
-      background: #23395d !important;
-      color: #fff !important;
-      border-radius: 7px;
-      box-shadow: none !important;
-      transition: background 0.2s;
-    }
-
-    .card .btn-primary:hover {
-      background: #4f6d7a !important;
-    }
   </style>
 </head>
 
 <body>
   <!-- NAVBAR -->
-  <nav class="navbar navbar-expand-lg shadow-sm mb-4">
+  <nav class="navbar navbar-expand-lg navbar-custom shadow-sm mb-4">
     <div class="container d-flex justify-content-between">
       <a class="navbar-brand d-flex align-items-center" href="#">
         <i class="bi bi-mortarboard-fill me-2 fs-3" style="color: #fff;"></i>
         <span class="fw-bold">Sistema Escolar Etec</span>
       </a>
-      <button class="btn btn-danger" onclick="window.location.href='../../src/logout.php'">
+      <button class="btn btn-danger ms-2" onclick="window.location.href='../../src/logout.php'">
         <i class="bi bi-box-arrow-right me-1"></i> Sair
       </button>
     </div>
@@ -110,7 +111,7 @@ $result = $conn->query($sql);
   <!-- CONTEÚDO -->
   <div class="container py-4">
     <h3 class="text-center mb-5">
-      <i class="bi bi-tools me-2" style="color: #fff;"></i>
+      <i class="bi bi-tools me-2" style="color: #f7c948;"></i>
       Chamados de Manutenção
     </h3>
     <div class="row g-4">
@@ -129,7 +130,7 @@ $result = $conn->query($sql);
         <?php endforeach; ?>
       <?php else: ?>
         <div class="col-12">
-          <div class="alert alert-info text-center">Nenhum chamado encontrado.</div>
+          <div class="alert alert-info text-center rounded-3">Nenhum chamado encontrado.</div>
         </div>
       <?php endif; ?>
     </div>

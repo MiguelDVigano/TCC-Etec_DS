@@ -18,6 +18,7 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <title>Reserva de Laboratórios</title>
@@ -25,115 +26,93 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #23395d 0%, #4f6d7a 100%);
+            background: linear-gradient(135deg, #23395d 0%, #4f6d7a 100%) !important;
             min-height: 100vh;
         }
-        .navbar {
+
+        .navbar-custom {
             background: linear-gradient(135deg, #23395d 0%, #4f6d7a 100%) !important;
-            box-shadow: 0 2px 12px #23395d22 !important;
-            border-radius: 12px !important;
+            border-radius: 12px;
         }
-        .navbar .navbar-brand, .navbar .nav-link, .navbar .navbar-toggler {
+
+        .navbar-custom .navbar-brand,
+        .navbar-custom .nav-link,
+        .navbar-custom .navbar-toggler {
             color: #fff !important;
         }
-        .navbar .nav-link.active, .navbar .nav-link:focus {
+
+        .navbar-custom .nav-link.active,
+        .navbar-custom .nav-link:focus {
             color: #f7c948 !important;
         }
-        .navbar .nav-link.disabled {
+
+        .navbar-custom .nav-link.disabled {
             color: #bfc9d1 !important;
         }
-        .card, .modal-content {
+
+        .card,
+        .modal-content {
             background: #f7f9fa !important;
             border-radius: 12px !important;
             box-shadow: 0 4px 24px #23395d33 !important;
             border: none !important;
         }
-        .card-title, .modal-title, h2 {
+
+        .card-title,
+        .modal-title,
+        h2 {
             color: #23395d !important;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        .form-label, .modal-title {
+
+        .form-label,
+        .modal-title {
             color: #23395d !important;
             font-weight: 500;
         }
-        .form-control, .form-select, textarea {
-            background-color: #f7f9fa !important;
-            border: 1.5px solid #bfc9d1 !important;
+
+        .btn-primary,
+        .btn-success {
             border-radius: 7px !important;
-            font-size: 15px;
-            transition: border-color 0.3s, box-shadow 0.3s;
-        }
-        .form-control:focus, .form-select:focus, textarea:focus {
-            outline: none;
-            border-color: #23395d !important;
-            box-shadow: 0 0 0 2px #23395d22 !important;
-            background-color: #fff !important;
-        }
-        .btn-primary, .btn-success {
-            background: linear-gradient(135deg, #23395d 0%, #4f6d7a 100%) !important;
-            color: #fff !important;
-            border: none !important;
-            border-radius: 7px !important;
-            font-size: 16px;
             font-weight: 600;
-            box-shadow: 0 2px 8px #23395d22;
-            transition: background 0.2s, box-shadow 0.2s;
         }
-        .btn-primary:hover, .btn-success:hover {
-            background: linear-gradient(135deg, #1a2940 0%, #23395d 100%) !important;
-            box-shadow: 0 4px 16px #23395d33;
-        }
+
+        .btn-danger,
         .btn-secondary {
-            background: #bfc9d1 !important;
-            color: #23395d !important;
-            border: none !important;
             border-radius: 7px !important;
-            font-size: 16px;
-            font-weight: 600;
-            box-shadow: 0 2px 8px #23395d22;
-            transition: background 0.2s, box-shadow 0.2s;
-        }
-        .btn-secondary:hover {
-            background: #4f6d7a !important;
-            color: #fff !important;
-        }
-        .alert {
-            border-radius: 7px !important;
-            font-size: 15px;
-            box-shadow: 0 2px 8px #23395d22;
         }
     </style>
 </head>
+
 <body>
     <!-- Navbar Bootstrap -->
-        <nav class="navbar navbar-expand-lg bg-body-tertiary shadow-sm mb-4">
-            <div class="container">
-                <a class="navbar-brand d-flex align-items-center" href="#">
-                    <i class="bi bi-mortarboard-fill me-2 fs-3" style="color: #f7c948;"></i>
-                    <span class="fw-bold">Sistema Escolar Etec</span>
-                </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarProfessor" aria-controls="navbarProfessor" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarProfessor">
-                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                        <li class="nav-item">
-                            <a class="nav-link active fw-bold" href="reservar_laboratorio.php"><i class="bi bi-pc-display-horizontal me-1"></i>Laboratórios</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="mensagem.php"><i class="bi bi-chat-dots me-1"></i>Mensagens</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="problema.php"><i class="bi bi-tools me-1"></i>Enviar Problema</a>
-                        </li>
-                        <li class="nav-item">
-                            <button class="btn btn-danger d-flex align-items-center" onclick="window.location.href='../../src/logout.php'" style="margin-left:12px;"><i class="bi bi-box-arrow-right me-1"></i>Sair</button>
-                        </li>
-                    </ul>
-                </div>
+    <nav class="navbar navbar-expand-lg navbar-custom shadow-sm mb-4">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <i class="bi bi-mortarboard-fill me-2 fs-3" style="color: #f7c948;"></i>
+                <span class="fw-bold">Sistema Escolar Etec</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarProfessor" aria-controls="navbarProfessor" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarProfessor">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link active fw-bold" href="reservar_laboratorio.php"><i class="bi bi-pc-display-horizontal me-1"></i>Laboratórios</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="mensagem.php"><i class="bi bi-chat-dots me-1"></i>Mensagens</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="problema_professor.php"><i class="bi bi-tools me-1"></i>Enviar Problema</a>
+                    </li>
+                    <li class="nav-item">
+                        <button class="btn btn-danger ms-2" onclick="window.location.href='../../src/logout.php'"><i class="bi bi-box-arrow-right me-1"></i>Sair</button>
+                    </li>
+                </ul>
             </div>
-        </nav>
+        </div>
+    </nav>
     <div class="container">
         <div class="row justify-content-center">
             <?php if ($result->num_rows > 0): ?>
@@ -171,7 +150,7 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
                 <?php endwhile; ?>
             <?php else: ?>
                 <div class="col-12">
-                    <div class="alert alert-warning text-center">
+                    <div class="alert alert-warning text-center rounded-3">
                         <i class="bi bi-info-circle me-2"></i>Nenhum laboratório encontrado.
                     </div>
                 </div>
@@ -253,7 +232,7 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
         var inputHoraFim = document.getElementById('inputHoraFim');
         var reservaBtnStatus = null;
 
-        modalReserva.addEventListener('show.bs.modal', function (event) {
+        modalReserva.addEventListener('show.bs.modal', function(event) {
             var button = event.relatedTarget;
             var idSala = button.getAttribute('data-id');
             var tituloSala = button.getAttribute('data-titulo');
@@ -265,7 +244,7 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
             inputDataReserva.value = '';
         });
 
-        inputDataReserva.addEventListener('change', function () {
+        inputDataReserva.addEventListener('change', function() {
             var idSala = inputIdSala.value;
             var dataReserva = inputDataReserva.value;
             if (!idSala || !dataReserva) {
@@ -282,7 +261,7 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
                         inputHoraInicio.innerHTML = '<option value="">Todos os horários reservados</option>';
                     } else {
                         inputHoraInicio.innerHTML = '<option value="">Selecione</option>';
-                        data.forEach(function (slot) {
+                        data.forEach(function(slot) {
                             var inicio = slot.split('-')[0];
                             inputHoraInicio.innerHTML += '<option value="' + inicio + '">' + slot + '</option>';
                         });
@@ -290,7 +269,7 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
                 });
         });
 
-        inputHoraInicio.addEventListener('change', function () {
+        inputHoraInicio.addEventListener('change', function() {
             var idSala = inputIdSala.value;
             var dataReserva = inputDataReserva.value;
             var horaInicio = inputHoraInicio.value;
@@ -303,7 +282,7 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
                 .then(data => {
                     inputHoraFim.innerHTML = '';
                     var found = false;
-                    data.forEach(function (slot, idx) {
+                    data.forEach(function(slot, idx) {
                         var inicio = slot.split('-')[0];
                         var fim = slot.split('-')[1];
                         if (inicio === horaInicio) found = true;
@@ -315,4 +294,5 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
         });
     </script>
 </body>
+
 </html>

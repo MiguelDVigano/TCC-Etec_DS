@@ -76,8 +76,8 @@
             setTimeout(function() {
                 popup.classList.remove("show");
 
-                // Redirecionar para problema.php (opcional)
-                window.location.href = "problema.php";
+                // Redirecionar para problema_professor.php (opcional)
+                window.location.href = "problema_professor.php";
             }, 3000);
         }
     </script>

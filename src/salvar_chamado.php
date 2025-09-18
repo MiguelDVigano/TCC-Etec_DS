@@ -9,7 +9,7 @@ require_once '../conexao.php';
 
 // Apenas aceitar POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header("Location: ../view/professor/problema.php");
+    header("Location: ../view/professor/problema_professor.php");
     exit();
 }
 
@@ -18,7 +18,7 @@ $id_sala = isset($_POST['id_sala']) ? intval($_POST['id_sala']) : 0;
 $descricao = isset($_POST['descricao']) ? trim($_POST['descricao']) : '';
 
 if ($id_sala <= 0 || $descricao === '') {
-    header("Location: ../view/professor/problema.php?error=missing");
+    header("Location: ../view/professor/problema_professor.php?error=missing");
     exit();
 }
 
@@ -28,7 +28,7 @@ $stmt->bind_param("i", $id_sala);
 $stmt->execute();
 $res = $stmt->get_result();
 if ($res->num_rows === 0) {
-    header("Location: ../view/professor/problema.php?error=invalid_sala");
+    header("Location: ../view/professor/problema_professor.php?error=invalid_sala");
     exit();
 }
 $sala = $res->fetch_assoc();
@@ -46,7 +46,7 @@ if (isset($_FILES['imagemDefeito']) && $_FILES['imagemDefeito']['error'] !== UPL
     $file = $_FILES['imagemDefeito'];
 
     if ($file['error'] !== UPLOAD_ERR_OK) {
-        header("Location: ../view/professor/problema.php?error=upload");
+        header("Location: ../view/professor/problema_professor.php?error=upload");
         exit();
     }
 
@@ -57,7 +57,7 @@ if (isset($_FILES['imagemDefeito']) && $_FILES['imagemDefeito']['error'] !== UPL
 
     $allowed = ['image/jpeg' => '.jpg', 'image/png' => '.png', 'image/gif' => '.gif', 'image/webp' => '.webp'];
     if (!array_key_exists($mime, $allowed)) {
-        header("Location: ../view/professor/problema.php?error=type");
+        header("Location: ../view/professor/problema_professor.php?error=type");
         exit();
     }
 
@@ -66,7 +66,7 @@ if (isset($_FILES['imagemDefeito']) && $_FILES['imagemDefeito']['error'] !== UPL
     $target = $uploadPath . $filename;
 
     if (!move_uploaded_file($file['tmp_name'], $target)) {
-        header("Location: ../view/professor/problema.php?error=move");
+        header("Location: ../view/professor/problema_professor.php?error=move");
         exit();
     }
 
@@ -82,7 +82,7 @@ $ok = $stmt->execute();
 $stmt->close();
 
 if ($_SESSION['tipo_usuario'] === 'professor') {
-    header("Location: ../view/professor/problema.php");
+    header("Location: ../view/professor/problema_professor.php");
 } else if ($_SESSION['tipo_usuario'] === 'aluno') {
-    header("Location: ../view/aluno/problema.php");
+    header("Location: ../view/professor/problema_aluno.php");
 };

@@ -1,6 +1,6 @@
 <?php
 session_start();
-if (!isset($_SESSION["id_usuario"]) || $_SESSION["tipo_usuario"] !== "Professor") {
+if (!isset($_SESSION["id_usuario"]) || $_SESSION["tipo_usuario"] !== "Aluno") {
     header("Location: ../Login.html");
     exit();
 }
@@ -28,12 +28,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
   <style>
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #23395d 0%, #4f6d7a 100%);
+      background: linear-gradient(135deg, #23395d 0%, #4f6d7a 100%) !important;
       min-height: 100vh;
     }
 
-    .card {
+    .navbar-custom {
+      background: linear-gradient(135deg, #23395d 0%, #4f6d7a 100%) !important;
+      border-radius: 12px;
+    }
+
+    .navbar-custom .navbar-brand,
+    .navbar-custom .nav-link,
+    .navbar-custom .navbar-toggler {
+      color: #fff !important;
+    }
+
+    .navbar-custom .nav-link.active,
+    .navbar-custom .nav-link:focus {
+      color: #f7c948 !important;
+    }
+
+    .navbar-custom .nav-link.disabled {
+      color: #bfc9d1 !important;
+    }
+
+    .card,
+    .modal-content {
       background: #f7f9fa !important;
       border-radius: 12px !important;
       box-shadow: 0 4px 24px #23395d33 !important;
@@ -41,10 +61,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     .card-title,
+    .modal-title,
     h3 {
       color: #23395d !important;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       font-weight: 700;
+    }
+
+    .btn-primary,
+    .btn-success {
+      border-radius: 7px !important;
+      font-weight: 600;
+    }
+
+    .btn-danger {
+      border-radius: 7px !important;
     }
 
     .form-label {
@@ -91,28 +122,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       background: #23395d !important;
     }
 
-    .navbar {
-      background: linear-gradient(135deg, #23395d 0%, #4f6d7a 100%) !important;
-      box-shadow: 0 2px 12px #23395d22 !important;
-      border-radius: 12px !important;
-      margin-bottom: 32px;
-    }
-
-    .navbar .navbar-brand,
-    .navbar .nav-link,
-    .navbar .navbar-toggler {
-      color: #fff !important;
-    }
-
-    .navbar .nav-link.active,
-    .navbar .nav-link:focus {
-      color: #f7c948 !important;
-    }
-
-    .navbar .nav-link.disabled {
-      color: #bfc9d1 !important;
-    }
-
     .btn-danger {
       background: #c0392b !important;
       color: #fff !important;
@@ -138,6 +147,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       color: #333;
       padding: 32px 40px;
       border-radius: 12px;
+      border: 2px solid #222;
       box-shadow: 0 4px 24px rgba(44, 62, 80, 0.18);
       opacity: 0;
       visibility: hidden;
@@ -147,7 +157,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       font-size: 1.2rem;
       text-align: center;
       min-width: 320px;
-      border: 2px solid #222;
     }
 
     .popup.show {
@@ -176,28 +185,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 
 <body>
-  <nav class="navbar navbar-expand-lg bg-body-tertiary shadow-sm mb-4">
+  <nav class="navbar navbar-expand-lg navbar-custom shadow-sm mb-4">
     <div class="container">
       <a class="navbar-brand d-flex align-items-center" href="#">
         <i class="bi bi-mortarboard-fill me-2 fs-3" style="color: #f7c948;"></i>
         <span class="fw-bold">Sistema Escolar Etec</span>
       </a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarProfessor" aria-controls="navbarProfessor" aria-expanded="false" aria-label="Toggle navigation">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarAluno" aria-controls="navbarAluno" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
-      <div class="collapse navbar-collapse" id="navbarProfessor">
+      <div class="collapse navbar-collapse" id="navbarAluno">
         <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
           <li class="nav-item">
-            <a class="nav-link" href="reservar_laboratorio.php"><i class="bi bi-pc-display-horizontal me-1"></i>Laboratórios</a>
+            <a class="nav-link" href="mensagem_aluno.php"><i class="bi bi-chat-dots me-1"></i>Mensagens</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="mensagem.php"><i class="bi bi-chat-dots me-1"></i>Mensagens</a>
+            <a class="nav-link active fw-bold" href=""><i class="bi bi-tools me-1"></i>Enviar Problema</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link active fw-bold" href="problema.html"><i class="bi bi-tools me-1"></i>Enviar Problema</a>
-          </li>
-          <li class="nav-item">
-            <button class="btn btn-danger" onclick="window.location.href='../../src/logout.php'" style="margin-left:12px;"><i class="bi bi-box-arrow-right me-1"></i>Sair</button>
+            <button class="btn btn-danger ms-2" onclick="window.location.href='../../src/logout.php'"><i class="bi bi-box-arrow-right me-1"></i>Sair</button>
           </li>
         </ul>
       </div>
@@ -231,7 +237,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <label for="descricaoProblema" class="form-label">Descrição do Problema</label>
                 <textarea class="form-control" id="descricaoProblema" name="descricao" rows="4" placeholder="Descreva o defeito encontrado..." required></textarea>
               </div>
-              <button type="submit" class="btn btn-primary w-100 rounded-3">
+              <button type="submit" class="btn btn-primary w-100">
                 <i class="bi bi-send me-1"></i>Enviar
               </button>
             </form>

@@ -16,7 +16,7 @@
         $_SESSION["id_usuario"] = $user["id_usuario"];
         $_SESSION["tipo_usuario"] = $user["tipo_usuario"];
         if ($tipoUsuario == "Professor") {
-            header("Location: ../view/professor/reservar_laboratorio.php");
+            header("Location: ../view/professor/laboratorios.php");
         } else if ($tipoUsuario == "Aluno") {
             header("Location: ../view/aluno/mensagem_aluno.php");
         } else if ($tipoUsuario == "Manutencao") {

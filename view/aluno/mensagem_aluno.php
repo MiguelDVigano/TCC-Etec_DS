@@ -89,23 +89,20 @@ $result_mensagens = $conn->query($sql_mensagens);
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #23395d 0%, #4f6d7a 100%);
+            background: linear-gradient(135deg, #23395d 0%, #4f6d7a 100%) !important;
             min-height: 100vh;
         }
-        .navbar {
+        .navbar-custom {
             background: linear-gradient(135deg, #23395d 0%, #4f6d7a 100%) !important;
-            box-shadow: 0 2px 12px #23395d22 !important;
-            border-radius: 12px !important;
-            margin-bottom: 32px;
+            border-radius: 12px;
         }
-        .navbar .navbar-brand, .navbar .nav-link, .navbar .navbar-toggler {
+        .navbar-custom .navbar-brand, .navbar-custom .nav-link, .navbar-custom .navbar-toggler {
             color: #fff !important;
         }
-        .navbar .nav-link.active, .navbar .nav-link:focus {
+        .navbar-custom .nav-link.active, .navbar-custom .nav-link:focus {
             color: #f7c948 !important;
         }
-        .navbar .nav-link.disabled {
+        .navbar-custom .nav-link.disabled {
             color: #bfc9d1 !important;
         }
         .card {
@@ -122,36 +119,15 @@ $result_mensagens = $conn->query($sql_mensagens);
             color: #23395d !important;
             font-weight: 700;
         }
-        .btn-primary {
-            background: linear-gradient(135deg, #23395d 0%, #4f6d7a 100%) !important;
-            color: #fff !important;
-            border: none !important;
+        .btn-primary, .btn-success {
             border-radius: 7px !important;
-            font-size: 16px;
             font-weight: 600;
-            box-shadow: 0 2px 8px #23395d22;
-            transition: background 0.2s, box-shadow 0.2s;
-        }
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #1a2940 0%, #23395d 100%) !important;
-            box-shadow: 0 4px 16px #23395d33;
         }
         .btn-danger {
-            background: #c0392b !important;
-            color: #fff !important;
-            border: none !important;
             border-radius: 7px !important;
-            font-size: 16px;
-            font-weight: 600;
-            box-shadow: 0 2px 8px #23395d22;
-            transition: background 0.2s, color 0.2s;
-        }
-        .btn-danger:hover {
-            background: #a93226 !important;
-            color: #fff !important;
         }
         h3 {
-            color: #f7c948 !important;
+            color: #23395d !important;
             font-weight: 700;
         }
         .filtro-mensagens {
@@ -168,7 +144,7 @@ $result_mensagens = $conn->query($sql_mensagens);
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg bg-body-tertiary shadow-sm mb-4">
+    <nav class="navbar navbar-expand-lg navbar-custom shadow-sm mb-4">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="#">
                 <i class="bi bi-mortarboard-fill me-2 fs-3" style="color: #f7c948;"></i>
@@ -183,10 +159,10 @@ $result_mensagens = $conn->query($sql_mensagens);
                         <a class="nav-link active fw-bold" href="#"><i class="bi bi-chat-dots me-1"></i>Mensagens</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="problema.php"><i class="bi bi-tools me-1"></i>Enviar Problema</a>
+                        <a class="nav-link" href="problema_aluno.php"><i class="bi bi-tools me-1"></i>Enviar Problema</a>
                     </li>
                     <li class="nav-item">
-                        <button class="btn btn-danger" onclick="window.location.href='../../src/logout.php'" style="margin-left:12px;"><i class="bi bi-box-arrow-right me-1"></i>Sair</button>
+                        <button class="btn btn-danger ms-2" onclick="window.location.href='../../src/logout.php'"><i class="bi bi-box-arrow-right me-1"></i>Sair</button>
                     </li>
                 </ul>
             </div>
@@ -245,7 +221,7 @@ $result_mensagens = $conn->query($sql_mensagens);
                 <?php endwhile; ?>
             <?php else: ?>
                 <div class="col-12">
-                    <div class="alert alert-info text-center">Nenhuma mensagem encontrada.</div>
+                    <div class="alert alert-info text-center rounded-3">Nenhuma mensagem encontrada.</div>
                 </div>
             <?php endif; ?>
         </div>
