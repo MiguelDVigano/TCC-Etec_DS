@@ -7,35 +7,12 @@ if (!isset($_SESSION["id_usuario"]) || $_SESSION["tipo_usuario"] !== "Professor"
 }
 
 include '../../conexao.php';
-
-// Busca as turmas para o dropdown de seleção
-$sql_turmas = "SELECT id_turma, nome_turma FROM turma ORDER BY nome_turma";
-$result_turmas = $conn->query($sql_turmas);
+include '../../src/funcao_professor.php';
 
 // --- INÍCIO: Adicionar filtros de pesquisa ---
-$filtro_assunto = isset($_GET['filtro_assunto']) ? trim($_GET['filtro_assunto']) : '';
-$filtro_data = isset($_GET['filtro_data']) ? trim($_GET['filtro_data']) : '';
-
-$id_remetente = $_SESSION["id_usuario"];
-$where = "m.id_remetente = $id_remetente";
-if ($filtro_assunto !== '') {
-    $where .= " AND m.assunto LIKE '%" . $conn->real_escape_string($filtro_assunto) . "%'";
-}
-if ($filtro_data !== '') {
-    $where .= " AND DATE(m.data_envio) = '" . $conn->real_escape_string($filtro_data) . "'";
-}
-
-$sql_mensagens_enviadas = "
-    SELECT m.assunto, m.mensagem, m.data_envio,
-           (SELECT GROUP_CONCAT(t.nome_turma SEPARATOR ', ')
-            FROM mensagem_turma mt
-            JOIN turma t ON mt.id_mensagem = m.id_mensagem
-            WHERE mt.id_mensagem = m.id_mensagem) AS turmas_destinatarias
-    FROM mensagem m
-    WHERE $where
-    ORDER BY m.data_envio DESC
-";
-$result_mensagens_enviadas = $conn->query($sql_mensagens_enviadas);
+$result_turmas = buscarTurmas($conn);
+list($filtro_assunto, $filtro_data) = obterFiltrosMensagem();
+$result_mensagens_enviadas = buscarMensagensEnviadas($conn, $_SESSION["id_usuario"], $filtro_assunto, $filtro_data);
 // --- FIM: Adicionar filtros de pesquisa ---
 ?>
 <!DOCTYPE html>
@@ -208,7 +185,14 @@ $result_mensagens_enviadas = $conn->query($sql_mensagens_enviadas);
                             <div class="list-group-item list-group-item-action mb-2 rounded-3">
                                 <div class="d-flex w-100 justify-content-between">
                                     <h5 class="mb-1 fw-bold"><?php echo htmlspecialchars($msg['assunto']); ?></h5>
-                                    <small class="text-muted"><?php echo date('d/m/Y H:i', strtotime($msg['data_envio'])); ?></small>
+                                    <div>
+                                        <button type="button" class="btn btn-outline-info btn-sm me-2"
+                                            title="Ver informações de leitura"
+                                            onclick="abrirInfoLeitura(<?php echo $msg['id_mensagem']; ?>)">
+                                            <i class="bi bi-info-circle"></i>
+                                        </button>
+                                        <small class="text-muted"><?php echo date('d/m/Y H:i', strtotime($msg['data_envio'])); ?></small>
+                                    </div>
                                 </div>
                                 <p class="mb-1 text-muted"><?php echo nl2br(htmlspecialchars($msg['mensagem'])); ?></p>
                                 <small class="text-secondary">
@@ -225,9 +209,39 @@ $result_mensagens_enviadas = $conn->query($sql_mensagens_enviadas);
             </div>
         </div>
     </div>
+    <!-- Modal de informações de leitura -->
+    <div class="modal fade" id="modalInfoLeitura" tabindex="-1" aria-labelledby="modalInfoLeituraLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalInfoLeituraLabel"><i class="bi bi-info-circle me-2"></i>Informações de Leitura</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+          </div>
+          <div class="modal-body">
+            <div id="infoLeituraConteudo">
+              <div class="text-center text-muted"><i class="bi bi-arrow-repeat"></i> Carregando...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    function abrirInfoLeitura(idMensagem) {
+        const modal = new bootstrap.Modal(document.getElementById('modalInfoLeitura'));
+        document.getElementById('infoLeituraConteudo').innerHTML = '<div class="text-center text-muted"><i class="bi bi-arrow-repeat"></i> Carregando...</div>';
+        modal.show();
+        fetch('../../src/info_leitura_mensagem.php?id_mensagem=' + idMensagem)
+            .then(resp => resp.text())
+            .then(html => {
+                document.getElementById('infoLeituraConteudo').innerHTML = html;
+            })
+            .catch(() => {
+                document.getElementById('infoLeituraConteudo').innerHTML = '<div class="alert alert-danger">Erro ao carregar informações.</div>';
+            });
+    }
+    </script>
 </body>
-
 </html>
 <?php
 $conn->close();
