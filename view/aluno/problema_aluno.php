@@ -43,6 +43,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       color: #fff !important;
     }
 
+    .navbar-custom .navbar-toggler {
+      border: none;
+      padding: 0.25rem 0.5rem;
+    }
+
+    .navbar-custom .navbar-toggler:focus {
+      box-shadow: none;
+    }
+
+    .navbar-custom .navbar-toggler-icon {
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    }
+
     .navbar-custom .nav-link.active,
     .navbar-custom .nav-link:focus {
       color: #f7c948 !important;
@@ -138,6 +151,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       color: #fff !important;
     }
 
+    .btn-danger:focus, .btn-danger.focus {
+      background: #922b20 !important;
+      border-color: #922b20 !important;
+      box-shadow: 0 0 0 0.2rem rgba(169, 50, 38, 0.5) !important;
+    }
+
     .popup {
       position: fixed;
       top: 50%;
@@ -181,6 +200,137 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       color: #555;
       font-size: 1rem;
     }
+
+    /* Responsive improvements */
+    @media (max-width: 991.98px) {
+      .navbar-nav {
+        text-align: center;
+        margin-top: 0.5rem;
+      }
+      
+      .btn-danger {
+        margin-top: 0.5rem;
+        width: 100%;
+        font-size: 0.875rem;
+        padding: 0.5rem 0.75rem;
+      }
+    }
+
+    @media (max-width: 767.98px) {
+      .container {
+        padding-left: 15px;
+        padding-right: 15px;
+      }
+      
+      .navbar {
+        border-radius: 8px;
+        margin-bottom: 1rem;
+      }
+      
+      .navbar-brand {
+        font-size: 0.95rem;
+      }
+      
+      .navbar-brand .bi {
+        font-size: 1.8rem !important;
+      }
+      
+      .btn-danger {
+        font-size: 0.875rem;
+        padding: 0.5rem 0.75rem;
+        width: 100%;
+        margin-top: 0.75rem;
+      }
+      
+      h3 {
+        font-size: 1.5rem;
+      }
+      
+      .py-5 {
+        padding-top: 2rem !important;
+        padding-bottom: 2rem !important;
+      }
+      
+      .col-md-6 {
+        max-width: 100%;
+        flex: 0 0 100%;
+      }
+    }
+    
+    @media (max-width: 575.98px) {
+      .navbar {
+        border-radius: 6px;
+        margin-bottom: 0.75rem;
+      }
+      
+      .navbar-brand {
+        font-size: 0.85rem;
+      }
+      
+      .navbar-brand .bi {
+        font-size: 1.5rem !important;
+      }
+      
+      .btn-danger {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.6rem;
+      }
+      
+      h3 {
+        font-size: 1.25rem;
+      }
+      
+      .card-body {
+        padding: 1.5rem !important;
+      }
+      
+      .btn {
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+      }
+      
+      .container {
+        padding-left: 12px;
+        padding-right: 12px;
+      }
+      
+      .py-5 {
+        padding-top: 1.5rem !important;
+        padding-bottom: 1.5rem !important;
+      }
+      
+      .form-control, .form-select, textarea {
+        font-size: 16px; /* Prevents zoom on iOS */
+      }
+    }
+    
+    @media (max-width: 399.98px) {
+      .navbar-brand span {
+        display: none;
+      }
+      
+      .navbar-brand .bi {
+        font-size: 1.25rem !important;
+      }
+      
+      .py-5 {
+        padding-top: 1rem !important;
+        padding-bottom: 1rem !important;
+      }
+      
+      .container {
+        padding-left: 8px;
+        padding-right: 8px;
+      }
+      
+      h3 {
+        font-size: 1.1rem;
+      }
+      
+      .card-body {
+        padding: 1rem !important;
+      }
+    }
   </style>
 </head>
 
@@ -211,7 +361,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   </nav>
   <div class="container py-5">
     <div class="row justify-content-center">
-      <div class="col-md-6">
+      <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5">
         <div class="card shadow-lg border-0 rounded-4">
           <div class="card-body p-4">
             <h3 class="text-center mb-4"><i class="bi bi-tools me-2"></i>Reportar Defeito</h3>

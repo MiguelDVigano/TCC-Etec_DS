@@ -41,6 +41,19 @@ $result = $conn->query($sql);
       color: #fff !important;
     }
 
+    .navbar-custom .navbar-toggler {
+      border: none;
+      padding: 0.25rem 0.5rem;
+    }
+
+    .navbar-custom .navbar-toggler:focus {
+      box-shadow: none;
+    }
+
+    .navbar-custom .navbar-toggler-icon {
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    }
+
     .navbar-custom .nav-link.active,
     .navbar-custom .nav-link:focus {
       color: #f7c948 !important;
@@ -48,6 +61,14 @@ $result = $conn->query($sql);
 
     .navbar-custom .nav-link.disabled {
       color: #bfc9d1 !important;
+    }
+
+    .navbar-nav {
+      align-items: center;
+    }
+
+    .navbar-collapse {
+      flex-grow: 0;
     }
 
     .card {
@@ -65,6 +86,8 @@ $result = $conn->query($sql);
     .card-title {
       color: #23395d !important;
       font-weight: 700;
+      font-size: 1.1rem;
+      margin-bottom: 0.75rem;
     }
 
     .btn-primary,
@@ -85,11 +108,227 @@ $result = $conn->query($sql);
 
     .img-thumb {
       width: 100%;
-      height: 160px;
+      height: 200px;
       object-fit: cover;
       border-radius: 8px;
-      border: 1px solid #ccc;
-      margin-bottom: 10px;
+      border: 1px solid #ddd;
+      margin-bottom: 15px;
+    }
+
+    .card-info {
+      color: #666;
+      font-size: 0.95rem;
+      margin-bottom: 15px;
+    }
+
+    .card-info strong {
+      color: #23395d;
+    }
+
+    /* Responsive breakpoints */
+    @media (min-width: 1400px) {
+      .container {
+        max-width: 1320px;
+      }
+    }
+
+    @media (max-width: 1199.98px) {
+      .img-thumb {
+        height: 180px;
+      }
+      
+      .navbar-brand span {
+        font-size: 1.1rem;
+      }
+    }
+
+    @media (max-width: 991.98px) {
+      .img-thumb {
+        height: 170px;
+      }
+      
+      h3 {
+        font-size: 1.75rem;
+      }
+      
+      .navbar-brand span {
+        font-size: 1rem;
+      }
+      
+      .navbar-nav {
+        text-align: center;
+        margin-top: 0.5rem;
+      }
+      
+      .btn-danger {
+        margin-top: 0.5rem;
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 767.98px) {
+      .container {
+        padding-left: 15px;
+        padding-right: 15px;
+      }
+      
+      .navbar {
+        border-radius: 8px;
+        margin-bottom: 1rem;
+      }
+      
+      .navbar-brand {
+        font-size: 0.95rem;
+      }
+      
+      .navbar-brand .bi {
+        font-size: 1.8rem !important;
+      }
+      
+      .btn-danger {
+        font-size: 0.875rem;
+        padding: 0.5rem 0.75rem;
+        width: 100%;
+        margin-top: 0.75rem;
+      }
+      
+      h3 {
+        font-size: 1.5rem;
+      }
+      
+      .py-4 {
+        padding-top: 2rem !important;
+        padding-bottom: 2rem !important;
+      }
+      
+      .mb-5 {
+        margin-bottom: 2rem !important;
+      }
+      
+      .img-thumb {
+        height: 160px;
+      }
+
+      .row.g-4 {
+        --bs-gutter-x: 1rem;
+        --bs-gutter-y: 1rem;
+      }
+      
+      .modal-lg {
+        max-width: 90%;
+      }
+    }
+    
+    @media (max-width: 575.98px) {
+      .navbar {
+        border-radius: 6px;
+        margin-bottom: 0.75rem;
+      }
+      
+      .navbar-brand {
+        font-size: 0.85rem;
+      }
+      
+      .navbar-brand .bi {
+        font-size: 1.5rem !important;
+      }
+      
+      .btn-danger {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.6rem;
+        width: 100%;
+        margin-top: 0.5rem;
+      }
+      
+      h3 {
+        font-size: 1.25rem;
+        margin-bottom: 1.5rem !important;
+      }
+      
+      .card {
+        margin-bottom: 1rem;
+      }
+      
+      .card-title {
+        font-size: 1rem;
+      }
+      
+      .img-thumb {
+        height: 180px;
+      }
+      
+      .modal-dialog {
+        margin: 0.5rem;
+      }
+      
+      .modal-body {
+        padding: 1rem;
+      }
+      
+      .btn {
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+      }
+
+      .row.g-4 {
+        --bs-gutter-x: 0.75rem;
+        --bs-gutter-y: 1rem;
+      }
+
+      .container {
+        padding-left: 12px;
+        padding-right: 12px;
+      }
+      
+      .py-4 {
+        padding-top: 1.5rem !important;
+        padding-bottom: 1.5rem !important;
+      }
+    }
+    
+    @media (max-width: 399.98px) {
+      .navbar-brand span {
+        display: none;
+      }
+      
+      .navbar-brand .bi {
+        font-size: 1.25rem !important;
+      }
+      
+      .py-4 {
+        padding-top: 1rem !important;
+        padding-bottom: 1rem !important;
+      }
+      
+      .container {
+        padding-left: 8px;
+        padding-right: 8px;
+      }
+      
+      h3 {
+        font-size: 1.1rem;
+      }
+      
+      .modal-dialog {
+        margin: 0.25rem;
+      }
+
+      .row.g-4 {
+        --bs-gutter-x: 0.5rem;
+        --bs-gutter-y: 0.75rem;
+      }
+      
+      .card-title {
+        font-size: 0.95rem;
+      }
+      
+      .card-info {
+        font-size: 0.85rem;
+      }
+      
+      .btn {
+        font-size: 0.9rem;
+      }
     }
   </style>
 </head>
@@ -97,34 +336,45 @@ $result = $conn->query($sql);
 <body>
   <!-- NAVBAR -->
   <nav class="navbar navbar-expand-lg navbar-custom shadow-sm mb-4">
-    <div class="container d-flex justify-content-between">
+    <div class="container">
       <a class="navbar-brand d-flex align-items-center" href="#">
         <i class="bi bi-mortarboard-fill me-2 fs-3" style="color: #fff;"></i>
         <span class="fw-bold">Sistema Escolar Etec</span>
       </a>
-      <button class="btn btn-danger ms-2" onclick="window.location.href='../../src/logout.php'">
-        <i class="bi bi-box-arrow-right me-1"></i> Sair
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
       </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <button class="btn btn-danger" onclick="window.location.href='../../src/logout.php'">
+              <i class="bi bi-box-arrow-right me-1"></i> Sair
+            </button>
+          </li>
+        </ul>
+      </div>
     </div>
   </nav>
 
   <!-- CONTEÚDO -->
   <div class="container py-4">
-    <h3 class="text-center mb-5">
+    <h3 class="text-center mb-5" style="color: #fff !important;">
       <i class="bi bi-tools me-2" style="color: #f7c948;"></i>
       Chamados de Manutenção
     </h3>
     <div class="row g-4">
       <?php if ($result && $result->num_rows > 0): ?>
         <?php foreach ($result as $row): ?>
-          <div class="col-md-4">
-            <div class="card p-3">
-              <img src="<?php echo $row['url_foto'] ? htmlspecialchars($row['url_foto']) : 'https://via.placeholder.com/300x160'; ?>" alt="Foto do defeito" class="img-thumb">
-              <h5 class="card-title"><?php echo htmlspecialchars($row['titulo_chamado']); ?></h5>
-              <p><strong>Sala:</strong> <?php echo htmlspecialchars($row['titulo_sala']); ?></p>
-              <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#modal<?php echo $row['id_chamado']; ?>">
-                Visualizar Chamado
-              </button>
+          <div class="col-12 col-sm-6 col-md-6 col-lg-4 col-xl-3">
+            <div class="card h-100">
+              <div class="card-body p-3 d-flex flex-column">
+                <img src="<?php echo $row['url_foto'] ? htmlspecialchars($row['url_foto']) : 'https://via.placeholder.com/300x200'; ?>" alt="Foto do defeito" class="img-thumb">
+                <h5 class="card-title"><?php echo htmlspecialchars($row['titulo_chamado']); ?></h5>
+                <p class="card-info"><strong>Sala:</strong> <?php echo htmlspecialchars($row['titulo_sala']); ?></p>
+                <button class="btn btn-primary w-100 mt-auto" data-bs-toggle="modal" data-bs-target="#modal<?php echo $row['id_chamado']; ?>">
+                  <i class="bi bi-eye me-1"></i>Visualizar Chamado
+                </button>
+              </div>
             </div>
           </div>
         <?php endforeach; ?>
@@ -140,7 +390,7 @@ $result = $conn->query($sql);
   <?php if ($result && $result->num_rows > 0): ?>
     <?php foreach ($result as $row): ?>
       <div class="modal fade" id="modal<?php echo $row['id_chamado']; ?>" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
           <div class="modal-content">
             <div class="modal-header">
               <h5 class="modal-title"><i class="bi bi-tools me-2"></i><?php echo htmlspecialchars($row['titulo_chamado']); ?></h5>

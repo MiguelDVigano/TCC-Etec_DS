@@ -100,7 +100,7 @@ $result_mensagens_enviadas = buscarMensagensEnviadas($conn, $_SESSION["id_usuari
                         <a class="nav-link" href="laboratorios.php"><i class="bi bi-pc-display-horizontal me-1"></i>Laboratórios</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active fw-bold" href="mensagem.php"><i class="bi bi-chat-dots me-1"></i>Mensagens</a>
+                        <a class="nav-link active fw-bold" href="#"><i class="bi bi-chat-dots me-1"></i>Mensagens</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="problema_professor.php"><i class="bi bi-tools me-1"></i>Enviar Problema</a>

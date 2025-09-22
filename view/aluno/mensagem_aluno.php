@@ -99,6 +99,16 @@ $result_mensagens = $conn->query($sql_mensagens);
         .navbar-custom .navbar-brand, .navbar-custom .nav-link, .navbar-custom .navbar-toggler {
             color: #fff !important;
         }
+        .navbar-custom .navbar-toggler {
+            border: none;
+            padding: 0.25rem 0.5rem;
+        }
+        .navbar-custom .navbar-toggler:focus {
+            box-shadow: none;
+        }
+        .navbar-custom .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
         .navbar-custom .nav-link.active, .navbar-custom .nav-link:focus {
             color: #f7c948 !important;
         }
@@ -124,10 +134,21 @@ $result_mensagens = $conn->query($sql_mensagens);
             font-weight: 600;
         }
         .btn-danger {
+            background-color: #a93226 !important;
+            border-color: #a93226 !important;
             border-radius: 7px !important;
         }
+        .btn-danger:hover {
+            background-color: #a93226 !important;
+            border-color: #a93226 !important;
+        }
+        .btn-danger:focus, .btn-danger.focus {
+            background-color: #a93226 !important;
+            border-color: #a93226 !important;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.5) !important;
+        }
         h3 {
-            color: #23395d !important;
+            color: #fff !important;
             font-weight: 700;
         }
         .filtro-mensagens {
@@ -135,10 +156,176 @@ $result_mensagens = $conn->query($sql_mensagens);
             justify-content: center;
             gap: 32px;
             margin-bottom: 32px;
+            flex-wrap: wrap;
         }
         .filtro-mensagens label {
             font-weight: 600;
             color: #fdfdfd;
+        }
+
+        /* Responsive improvements */
+        @media (max-width: 991.98px) {
+            .navbar-nav {
+                text-align: center;
+                margin-top: 0.5rem;
+            }
+            
+            .btn-danger {
+                margin-top: 0.5rem;
+                width: 100%;
+            }
+            
+            .filtro-mensagens {
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .container {
+                padding-left: 15px;
+                padding-right: 15px;
+            }
+            
+            .navbar {
+                border-radius: 8px;
+                margin-bottom: 1rem;
+            }
+            
+            .navbar-brand {
+                font-size: 0.95rem;
+            }
+            
+            .navbar-brand .bi {
+                font-size: 1.8rem !important;
+            }
+            
+            .btn-danger {
+                font-size: 0.875rem;
+                padding: 0.5rem 0.75rem;
+                width: 100%;
+                margin-top: 0.75rem;
+            }
+            
+            h3 {
+                font-size: 1.5rem;
+            }
+            
+            .py-5 {
+                padding-top: 2rem !important;
+                padding-bottom: 2rem !important;
+            }
+            
+            .mb-5 {
+                margin-bottom: 2rem !important;
+            }
+            
+            .filtro-mensagens {
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+                margin-bottom: 24px;
+            }
+            
+            .form-check-inline {
+                margin-right: 0;
+            }
+            
+            .btn-primary {
+                margin-top: 0.5rem;
+            }
+        }
+        
+        @media (max-width: 575.98px) {
+            .navbar {
+                border-radius: 6px;
+                margin-bottom: 0.75rem;
+            }
+            
+            .navbar-brand {
+                font-size: 0.85rem;
+            }
+            
+            .navbar-brand .bi {
+                font-size: 1.5rem !important;
+            }
+            
+            .btn-danger {
+                font-size: 0.8rem;
+                padding: 0.4rem 0.6rem;
+            }
+            
+            h3 {
+                font-size: 1.25rem;
+                margin-bottom: 1.5rem !important;
+            }
+            
+            .card {
+                margin-bottom: 1rem;
+            }
+            
+            .card-title {
+                font-size: 1.1rem;
+            }
+            
+            .btn {
+                padding: 0.75rem 1rem;
+                font-size: 1rem;
+            }
+            
+            .container {
+                padding-left: 12px;
+                padding-right: 12px;
+            }
+            
+            .py-5 {
+                padding-top: 1.5rem !important;
+                padding-bottom: 1.5rem !important;
+            }
+            
+            .filtro-mensagens {
+                gap: 10px;
+                margin-bottom: 20px;
+            }
+            
+            .form-check label {
+                font-size: 0.9rem;
+            }
+        }
+        
+        @media (max-width: 399.98px) {
+            .navbar-brand span {
+                display: none;
+            }
+            
+            .navbar-brand .bi {
+                font-size: 1.25rem !important;
+            }
+            
+            .py-5 {
+                padding-top: 1rem !important;
+                padding-bottom: 1rem !important;
+            }
+            
+            .container {
+                padding-left: 8px;
+                padding-right: 8px;
+            }
+            
+            h3 {
+                font-size: 1.1rem;
+            }
+            
+            .card-title {
+                font-size: 1rem;
+            }
+            
+            .btn {
+                font-size: 0.9rem;
+            }
+            
+            .filtro-mensagens {
+                margin-bottom: 15px;
+            }
         }
     </style>
 </head>
@@ -200,7 +387,7 @@ $result_mensagens = $conn->query($sql_mensagens);
         <div class="row g-4">
             <?php if ($result_mensagens && $result_mensagens->num_rows > 0): ?>
                 <?php while ($msg = $result_mensagens->fetch_assoc()): ?>
-                    <div class="col-md-6 col-lg-4">
+                    <div class="col-12 col-sm-6 col-lg-4">
                         <div class="card p-3 h-100">
                             <h5 class="card-title"><?php echo htmlspecialchars($msg['assunto']); ?></h5>
                             <p class="card-text"><?php echo nl2br(htmlspecialchars($msg['mensagem'])); ?></p>

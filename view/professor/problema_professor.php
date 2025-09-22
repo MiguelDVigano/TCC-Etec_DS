@@ -64,6 +64,100 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       color: #23395d !important;
       font-weight: 500;
     }
+    
+    /* Responsive improvements */
+    @media (max-width: 768px) {
+      .container {
+        padding-left: 15px;
+        padding-right: 15px;
+      }
+      
+      .navbar-brand span {
+        font-size: 1rem;
+      }
+      
+      .navbar-nav .nav-link {
+        padding: 0.5rem 1rem;
+        text-align: center;
+      }
+      
+      .btn-danger {
+        width: 100%;
+        margin-top: 0.5rem;
+      }
+      
+      .card-body {
+        padding: 1.5rem !important;
+      }
+      
+      h3 {
+        font-size: 1.5rem;
+      }
+      
+      .py-5 {
+        padding-top: 2rem !important;
+        padding-bottom: 2rem !important;
+      }
+      
+      .mb-4 {
+        margin-bottom: 1.5rem !important;
+      }
+    }
+    
+    @media (max-width: 576px) {
+      .navbar-brand {
+        font-size: 0.9rem;
+      }
+      
+      .navbar-brand .bi {
+        font-size: 1.5rem !important;
+      }
+      
+      .card {
+        margin: 0 10px;
+      }
+      
+      .card-body {
+        padding: 1rem !important;
+      }
+      
+      h3 {
+        font-size: 1.25rem;
+        margin-bottom: 1rem !important;
+      }
+      
+      .form-control, .form-select {
+        font-size: 16px; /* Prevents zoom on iOS */
+      }
+      
+      .btn {
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+      }
+      
+      .modal-dialog {
+        margin: 1rem;
+      }
+      
+      .display-3 {
+        font-size: 2.5rem !important;
+      }
+    }
+    
+    @media (max-width: 400px) {
+      .navbar-brand span {
+        display: none;
+      }
+      
+      .card {
+        margin: 0 5px;
+      }
+      
+      .py-5 {
+        padding-top: 1rem !important;
+        padding-bottom: 1rem !important;
+      }
+    }
   </style>
 </head>
 
@@ -86,7 +180,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <a class="nav-link" href="mensagem.php"><i class="bi bi-chat-dots me-1"></i>Mensagens</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link active fw-bold" href=""><i class="bi bi-tools me-1"></i>Enviar Problema</a>
+            <a class="nav-link active fw-bold" href="#"><i class="bi bi-tools me-1"></i>Enviar Problema</a>
           </li>
           <li class="nav-item">
             <button class="btn btn-danger ms-2" onclick="window.location.href='../../src/logout.php'"><i class="bi bi-box-arrow-right me-1"></i>Sair</button>
@@ -97,7 +191,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   </nav>
   <div class="container py-5">
     <div class="row justify-content-center">
-      <div class="col-md-6">
+      <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5">
         <div class="card shadow-lg border-0 rounded-4">
           <div class="card-body p-4">
             <h3 class="text-center mb-4"><i class="bi bi-tools me-2"></i>Reportar Defeito</h3>
@@ -134,9 +228,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   </div>
   <!-- Pop-up de sucesso -->
   <div id="popup" class="modal fade<?php if ($showPopup) echo ' show d-block'; ?>" tabindex="-1" style="background:rgba(0,0,0,0.3);" <?php if ($showPopup) echo 'aria-modal="true" role="dialog"'; ?>>
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
       <div class="modal-content text-center">
-        <div class="modal-body">
+        <div class="modal-body p-4">
           <span class="display-3 text-success">&#10003;</span>
           <div class="fw-bold fs-5 mb-2">Problema enviado com sucesso!</div>
           <div class="text-secondary mb-2">Em breve sua solicitação será analisada e resolvida.</div>
