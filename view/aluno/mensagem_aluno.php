@@ -166,6 +166,18 @@ $result_mensagens = $conn->query($sql_mensagens);
             position: relative;
             z-index: 1;
         }
+        .filtro-btn.active {
+            box-shadow: 0 0 0 3px #23395d44;
+            border: 2px solid #f7c948 !important;
+            font-weight: 700;
+        }
+        .filtro-btn {
+            transition: box-shadow 0.2s, border 0.2s;
+        }
+        .filtro-btn:not(.active):hover {
+            box-shadow: 0 0 0 2px #23395d22;
+            border: 2px solid #bfc9d1 !important;
+        }
     </style>
 </head>
 <body class="min-vh-100">
@@ -196,24 +208,39 @@ $result_mensagens = $conn->query($sql_mensagens);
     </nav>
     <!-- Filtro de mensagens -->
     <div class="container mb-4">
-        <form method="get" class="row row-cols-1 row-cols-md-auto g-2 align-items-center justify-content-center">
-            <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="filtro" id="filtro_nao_lidas" value="nao_lidas" <?php if($filtro==='nao_lidas') echo 'checked'; ?>>
-                <label class="form-check-label" for="filtro_nao_lidas">Não lidas</label>
-            </div>
-            <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="filtro" id="filtro_lidas" value="lidas" <?php if($filtro==='lidas') echo 'checked'; ?>>
-                <label class="form-check-label" for="filtro_lidas">Já lidas</label>
-            </div>  
-            <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="filtro" id="filtro_antigas" value="antigas" <?php if($filtro==='antigas') echo 'checked'; ?>>
-                <label class="form-check-label" for="filtro_antigas">Antigas</label>
-            </div>
-            <div class="col-auto">
-                <button type="submit" class="btn btn-primary"><i class="bi bi-funnel me-1"></i>Filtrar</button>
-            </div>
+        <form method="get" class="d-flex justify-content-center align-items-center gap-3 flex-wrap">
+            <input type="hidden" name="filtro" id="filtro_hidden" value="<?php echo $filtro; ?>">
+            <button type="button" class="btn btn-lg btn-primary px-4 py-2 d-flex align-items-center gap-2 filtro-btn <?php if($filtro==='nao_lidas') echo 'active'; ?>" onclick="setFiltro('nao_lidas')">
+                <i class="bi bi-envelope-exclamation"></i> Não lidas
+            </button>
+            <button type="button" class="btn btn-lg btn-success px-4 py-2 d-flex align-items-center gap-2 filtro-btn <?php if($filtro==='lidas') echo 'active'; ?>" onclick="setFiltro('lidas')">
+                <i class="bi bi-envelope-check"></i> Já lidas
+            </button>
+            <button type="button" class="btn btn-lg btn-secondary px-4 py-2 d-flex align-items-center gap-2 filtro-btn <?php if($filtro==='antigas') echo 'active'; ?>" onclick="setFiltro('antigas')">
+                <i class="bi bi-archive"></i> Antigas
+            </button>
         </form>
     </div>
+    <style>
+        .filtro-btn.active {
+            box-shadow: 0 0 0 3px #23395d44;
+            border: 2px solid #f7c948 !important;
+            font-weight: 700;
+        }
+        .filtro-btn {
+            transition: box-shadow 0.2s, border 0.2s;
+        }
+        .filtro-btn:not(.active):hover {
+            box-shadow: 0 0 0 2px #23395d22;
+            border: 2px solid #bfc9d1 !important;
+        }
+    </style>
+    <script>
+        function setFiltro(valor) {
+            document.getElementById('filtro_hidden').value = valor;
+            document.querySelector('form').submit();
+        }
+    </script>
     <!-- Conteúdo Principal -->
     <div class="container py-4">
         <h3 class="text-center mb-4 bg-title">
