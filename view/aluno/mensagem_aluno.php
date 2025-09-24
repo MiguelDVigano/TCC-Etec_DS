@@ -107,47 +107,68 @@ $result_mensagens = $conn->query($sql_mensagens);
             color: #bfc9d1 !important;
         }
         .card {
-            background: #f7f9fa !important;
+            background: rgba(247, 249, 250, 0.95) !important;
             border-radius: 12px !important;
-            box-shadow: 0 4px 24px #23395d33 !important;
+            box-shadow: 0 4px 24px rgba(35, 57, 93, 0.2) !important;
             border: none !important;
+            backdrop-filter: blur(10px);
         }
         .card-title, h3 {
             color: #23395d !important;
             font-weight: 700;
         }
         h3.bg-title {
-            background: #23395d;
+            background: linear-gradient(135deg, #23395d 0%, #4f6d7a 100%);
             color: #fff !important;
             border-radius: 10px;
             padding: 16px 0;
             margin-bottom: 32px;
         }
         .btn-danger {
-            background: #a93226 !important;
+            background: linear-gradient(135deg, #a93226 0%, #922b21 100%) !important;
             color: #fff !important;
             border: none !important;
             border-radius: 7px !important;
             font-weight: 600;
         }
         .btn-danger:hover {
-            background: #922b21 !important;
+            background: linear-gradient(135deg, #922b21 0%, #7d251c 100%) !important;
         }
         .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #20754a 100%) !important;
+            border: none !important;
             border-radius: 7px !important;
             font-weight: 600;
+        }
+        .btn-success:hover {
+            background: linear-gradient(135deg, #20754a 0%, #1a5f3a 100%) !important;
         }
         .btn-primary {
+            background: linear-gradient(135deg, #23395d 0%, #4f6d7a 100%) !important;
+            border: none !important;
             border-radius: 7px !important;
             font-weight: 600;
         }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #1c2d47 0%, #425965 100%) !important;
+        }
         .alert-info {
-            background: #eaf1fb;
+            background: rgba(234, 241, 251, 0.9);
             color: #23395d;
+            border: 1px solid rgba(35, 57, 93, 0.2);
+            backdrop-filter: blur(5px);
+        }
+        .form-check-label {
+            color: #fff !important;
+            font-weight: 500;
+        }
+        .container {
+            position: relative;
+            z-index: 1;
         }
     </style>
 </head>
-<body class="bg-primary bg-gradient bg-opacity-25 min-vh-100">
+<body class="min-vh-100">
     <!-- Navbar Bootstrap -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-gradient shadow-sm mb-4" style="background: linear-gradient(135deg, #23395d 0%, #4f6d7a 100%)">
         <div class="container">
@@ -183,7 +204,7 @@ $result_mensagens = $conn->query($sql_mensagens);
             <div class="form-check form-check-inline">
                 <input class="form-check-input" type="radio" name="filtro" id="filtro_lidas" value="lidas" <?php if($filtro==='lidas') echo 'checked'; ?>>
                 <label class="form-check-label" for="filtro_lidas">Já lidas</label>
-            </div>
+            </div>  
             <div class="form-check form-check-inline">
                 <input class="form-check-input" type="radio" name="filtro" id="filtro_antigas" value="antigas" <?php if($filtro==='antigas') echo 'checked'; ?>>
                 <label class="form-check-label" for="filtro_antigas">Antigas</label>

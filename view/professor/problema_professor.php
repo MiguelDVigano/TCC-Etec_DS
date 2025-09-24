@@ -21,6 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Reportar Defeito - Laboratório</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
@@ -29,140 +30,80 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       background: linear-gradient(135deg, #23395d 0%, #4f6d7a 100%) !important;
       min-height: 100vh;
     }
-    .navbar-custom {
+    .navbar {
       background: linear-gradient(135deg, #23395d 0%, #4f6d7a 100%) !important;
       border-radius: 12px;
     }
-    .navbar-custom .navbar-brand, .navbar-custom .nav-link, .navbar-custom .navbar-toggler {
+    .navbar .navbar-brand, .navbar .nav-link, .navbar .navbar-toggler {
       color: #fff !important;
     }
-    .navbar-custom .nav-link.active, .navbar-custom .nav-link:focus {
+    .navbar .nav-link.active, .navbar .nav-link:focus {
       color: #f7c948 !important;
     }
-    .navbar-custom .nav-link.disabled {
+    .navbar .nav-link.disabled {
       color: #bfc9d1 !important;
     }
-    .card, .modal-content {
-      background: #f7f9fa !important;
+    .card {
+      background: rgba(247, 249, 250, 0.95) !important;
       border-radius: 12px !important;
-      box-shadow: 0 4px 24px #23395d33 !important;
+      box-shadow: 0 4px 24px rgba(35, 57, 93, 0.2) !important;
       border: none !important;
+      backdrop-filter: blur(10px);
     }
-    .card-title, .modal-title, h3 {
+    .card-title, h3 {
       color: #23395d !important;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       font-weight: 700;
     }
-    .btn-primary, .btn-success {
+    .btn-danger {
+      background: linear-gradient(135deg, #a93226 0%, #922b21 100%) !important;
+      color: #fff !important;
+      border: none !important;
       border-radius: 7px !important;
       font-weight: 600;
     }
-    .btn-danger {
+    .btn-danger:hover {
+      background: linear-gradient(135deg, #922b21 0%, #7d251c 100%) !important;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #23395d 0%, #4f6d7a 100%) !important;
+      border: none !important;
       border-radius: 7px !important;
+      font-weight: 600;
     }
-    .form-label {
-      color: #23395d !important;
-      font-weight: 500;
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #1c2d47 0%, #425965 100%) !important;
     }
-    
-    /* Responsive improvements */
-    @media (max-width: 768px) {
-      .container {
-        padding-left: 15px;
-        padding-right: 15px;
-      }
-      
-      .navbar-brand span {
-        font-size: 1rem;
-      }
-      
-      .navbar-nav .nav-link {
-        padding: 0.5rem 1rem;
-        text-align: center;
-      }
-      
-      .btn-danger {
-        width: 100%;
-        margin-top: 0.5rem;
-      }
-      
-      .card-body {
-        padding: 1.5rem !important;
-      }
-      
-      h3 {
-        font-size: 1.5rem;
-      }
-      
-      .py-5 {
-        padding-top: 2rem !important;
-        padding-bottom: 2rem !important;
-      }
-      
-      .mb-4 {
-        margin-bottom: 1.5rem !important;
-      }
+    .popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #fff;
+      padding: 2rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      z-index: 9999;
+      text-align: center;
+      min-width: 300px;
     }
-    
-    @media (max-width: 576px) {
-      .navbar-brand {
-        font-size: 0.9rem;
-      }
-      
-      .navbar-brand .bi {
-        font-size: 1.5rem !important;
-      }
-      
-      .card {
-        margin: 0 10px;
-      }
-      
-      .card-body {
-        padding: 1rem !important;
-      }
-      
-      h3 {
-        font-size: 1.25rem;
-        margin-bottom: 1rem !important;
-      }
-      
-      .form-control, .form-select {
-        font-size: 16px; /* Prevents zoom on iOS */
-      }
-      
-      .btn {
-        padding: 0.75rem 1rem;
-        font-size: 1rem;
-      }
-      
-      .modal-dialog {
-        margin: 1rem;
-      }
-      
-      .display-3 {
-        font-size: 2.5rem !important;
-      }
+    .popup.show {
+      opacity: 1;
+      visibility: visible;
     }
-    
-    @media (max-width: 400px) {
-      .navbar-brand span {
-        display: none;
-      }
-      
-      .card {
-        margin: 0 5px;
-      }
-      
-      .py-5 {
-        padding-top: 1rem !important;
-        padding-bottom: 1rem !important;
-      }
+    .popup .icon {
+      font-size: 3rem;
+      color: #28a745;
+      margin-bottom: 1rem;
     }
   </style>
 </head>
 
-<body>
-  <nav class="navbar navbar-expand-lg navbar-custom shadow-sm mb-4">
+<body class="min-vh-100">
+  <!-- Navbar Bootstrap -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-gradient shadow-sm mb-4" style="background: linear-gradient(135deg, #23395d 0%, #4f6d7a 100%)">
     <div class="container">
       <a class="navbar-brand d-flex align-items-center" href="#">
         <i class="bi bi-mortarboard-fill me-2 fs-3" style="color: #f7c948;"></i>
@@ -183,21 +124,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <a class="nav-link active fw-bold" href="#"><i class="bi bi-tools me-1"></i>Enviar Problema</a>
           </li>
           <li class="nav-item">
-            <button class="btn btn-danger ms-2" onclick="window.location.href='../../src/logout.php'"><i class="bi bi-box-arrow-right me-1"></i>Sair</button>
+            <button class="btn btn-danger ms-lg-2 mt-2 mt-lg-0" onclick="window.location.href='../../src/logout.php'"><i class="bi bi-box-arrow-right me-1"></i>Sair</button>
           </li>
         </ul>
       </div>
     </div>
   </nav>
-  <div class="container py-5">
+
+  <div class="container py-4">
     <div class="row justify-content-center">
-      <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5">
-        <div class="card shadow-lg border-0 rounded-4">
-          <div class="card-body p-4">
-            <h3 class="text-center mb-4"><i class="bi bi-tools me-2"></i>Reportar Defeito</h3>
+      <div class="col-12 col-md-8 col-lg-6">
+        <div class="card shadow">
+          <div class="card-body">
+            <h3 class="card-title text-center mb-4">
+              <i class="bi bi-tools me-2"></i>Reportar Defeito
+            </h3>
             <form action="" method="POST" enctype="multipart/form-data">
               <div class="mb-3">
-                <label for="laboratorio" class="form-label">Selecione o Laboratório</label>
+                <label for="laboratorio" class="form-label fw-semibold">Selecione o Laboratório</label>
                 <select class="form-select" id="laboratorio" name="id_sala" required>
                   <option value="" selected disabled>Escolha um laboratório</option>
                   <?php
@@ -209,42 +153,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                   ?>
                 </select>
               </div>
+              
               <div class="mb-3">
-                <label for="imagemDefeito" class="form-label">Foto do Defeito</label>
+                <label for="imagemDefeito" class="form-label fw-semibold">Foto do Defeito</label>
                 <input class="form-control" type="file" id="imagemDefeito" name="imagemDefeito" accept="image/png, image/jpeg, image/jpg">
               </div>
+              
               <div class="mb-3">
-                <label for="descricaoProblema" class="form-label">Descrição do Problema</label>
+                <label for="descricaoProblema" class="form-label fw-semibold">Descrição do Problema</label>
                 <textarea class="form-control" id="descricaoProblema" name="descricao" rows="4" placeholder="Descreva o defeito encontrado..." required></textarea>
               </div>
-              <button type="submit" class="btn btn-primary w-100">
-                <i class="bi bi-send me-1"></i>Enviar
-              </button>
+              
+              <div class="d-grid">
+                <button type="submit" class="btn btn-primary btn-lg">
+                  <i class="bi bi-send me-2"></i>Enviar Problema
+                </button>
+              </div>
             </form>
           </div>
         </div>
       </div>
     </div>
   </div>
+
   <!-- Pop-up de sucesso -->
-  <div id="popup" class="modal fade<?php if ($showPopup) echo ' show d-block'; ?>" tabindex="-1" style="background:rgba(0,0,0,0.3);" <?php if ($showPopup) echo 'aria-modal="true" role="dialog"'; ?>>
-    <div class="modal-dialog modal-dialog-centered modal-sm">
-      <div class="modal-content text-center">
-        <div class="modal-body p-4">
-          <span class="display-3 text-success">&#10003;</span>
-          <div class="fw-bold fs-5 mb-2">Problema enviado com sucesso!</div>
-          <div class="text-secondary mb-2">Em breve sua solicitação será analisada e resolvida.</div>
-        </div>
-      </div>
-    </div>
+  <div id="popup" class="popup<?php if ($showPopup) echo ' show'; ?>">
+    <div class="icon">✓</div>
+    <h5 class="fw-bold">Problema enviado com sucesso!</h5>
+    <p class="text-muted mb-0">Em breve sua solicitação será analisada e resolvida.</p>
   </div>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     <?php if ($showPopup): ?>
       window.onload = function() {
+        var popup = document.getElementById("popup");
+        popup.classList.add("show");
         setTimeout(function() {
-          var popup = document.getElementById("popup");
-          if (popup) popup.classList.remove("show", "d-block");
+          popup.classList.remove("show");
         }, 3000);
       }
     <?php endif; ?>
