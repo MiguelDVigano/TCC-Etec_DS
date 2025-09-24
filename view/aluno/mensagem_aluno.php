@@ -85,6 +85,7 @@ $result_mensagens = $conn->query($sql_mensagens);
 <head>
     <meta charset="UTF-8">
     <title>Mensagens - Aluno</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <style>
@@ -92,27 +93,17 @@ $result_mensagens = $conn->query($sql_mensagens);
             background: linear-gradient(135deg, #23395d 0%, #4f6d7a 100%) !important;
             min-height: 100vh;
         }
-        .navbar-custom {
+        .navbar {
             background: linear-gradient(135deg, #23395d 0%, #4f6d7a 100%) !important;
             border-radius: 12px;
         }
-        .navbar-custom .navbar-brand, .navbar-custom .nav-link, .navbar-custom .navbar-toggler {
+        .navbar .navbar-brand, .navbar .nav-link, .navbar .navbar-toggler {
             color: #fff !important;
         }
-        .navbar-custom .navbar-toggler {
-            border: none;
-            padding: 0.25rem 0.5rem;
-        }
-        .navbar-custom .navbar-toggler:focus {
-            box-shadow: none;
-        }
-        .navbar-custom .navbar-toggler-icon {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
-        }
-        .navbar-custom .nav-link.active, .navbar-custom .nav-link:focus {
+        .navbar .nav-link.active, .navbar .nav-link:focus {
             color: #f7c948 !important;
         }
-        .navbar-custom .nav-link.disabled {
+        .navbar .nav-link.disabled {
             color: #bfc9d1 !important;
         }
         .card {
@@ -120,218 +111,45 @@ $result_mensagens = $conn->query($sql_mensagens);
             border-radius: 12px !important;
             box-shadow: 0 4px 24px #23395d33 !important;
             border: none !important;
-            transition: transform 0.2s;
         }
-        .card:hover {
-            transform: translateY(-4px);
-        }
-        .card-title {
+        .card-title, h3 {
             color: #23395d !important;
             font-weight: 700;
         }
-        .btn-primary, .btn-success {
-            border-radius: 7px !important;
-            font-weight: 600;
+        h3.bg-title {
+            background: #23395d;
+            color: #fff !important;
+            border-radius: 10px;
+            padding: 16px 0;
+            margin-bottom: 32px;
         }
         .btn-danger {
-            background-color: #a93226 !important;
-            border-color: #a93226 !important;
+            background: #a93226 !important;
+            color: #fff !important;
+            border: none !important;
             border-radius: 7px !important;
+            font-weight: 600;
         }
         .btn-danger:hover {
-            background-color: #a93226 !important;
-            border-color: #a93226 !important;
+            background: #922b21 !important;
         }
-        .btn-danger:focus, .btn-danger.focus {
-            background-color: #a93226 !important;
-            border-color: #a93226 !important;
-            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.5) !important;
-        }
-        h3 {
-            color: #fff !important;
-            font-weight: 700;
-        }
-        .filtro-mensagens {
-            display: flex;
-            justify-content: center;
-            gap: 32px;
-            margin-bottom: 32px;
-            flex-wrap: wrap;
-        }
-        .filtro-mensagens label {
+        .btn-success {
+            border-radius: 7px !important;
             font-weight: 600;
-            color: #fdfdfd;
         }
-
-        /* Responsive improvements */
-        @media (max-width: 991.98px) {
-            .navbar-nav {
-                text-align: center;
-                margin-top: 0.5rem;
-            }
-            
-            .btn-danger {
-                margin-top: 0.5rem;
-                width: 100%;
-            }
-            
-            .filtro-mensagens {
-                gap: 20px;
-            }
+        .btn-primary {
+            border-radius: 7px !important;
+            font-weight: 600;
         }
-
-        @media (max-width: 767.98px) {
-            .container {
-                padding-left: 15px;
-                padding-right: 15px;
-            }
-            
-            .navbar {
-                border-radius: 8px;
-                margin-bottom: 1rem;
-            }
-            
-            .navbar-brand {
-                font-size: 0.95rem;
-            }
-            
-            .navbar-brand .bi {
-                font-size: 1.8rem !important;
-            }
-            
-            .btn-danger {
-                font-size: 0.875rem;
-                padding: 0.5rem 0.75rem;
-                width: 100%;
-                margin-top: 0.75rem;
-            }
-            
-            h3 {
-                font-size: 1.5rem;
-            }
-            
-            .py-5 {
-                padding-top: 2rem !important;
-                padding-bottom: 2rem !important;
-            }
-            
-            .mb-5 {
-                margin-bottom: 2rem !important;
-            }
-            
-            .filtro-mensagens {
-                flex-direction: column;
-                align-items: center;
-                gap: 15px;
-                margin-bottom: 24px;
-            }
-            
-            .form-check-inline {
-                margin-right: 0;
-            }
-            
-            .btn-primary {
-                margin-top: 0.5rem;
-            }
-        }
-        
-        @media (max-width: 575.98px) {
-            .navbar {
-                border-radius: 6px;
-                margin-bottom: 0.75rem;
-            }
-            
-            .navbar-brand {
-                font-size: 0.85rem;
-            }
-            
-            .navbar-brand .bi {
-                font-size: 1.5rem !important;
-            }
-            
-            .btn-danger {
-                font-size: 0.8rem;
-                padding: 0.4rem 0.6rem;
-            }
-            
-            h3 {
-                font-size: 1.25rem;
-                margin-bottom: 1.5rem !important;
-            }
-            
-            .card {
-                margin-bottom: 1rem;
-            }
-            
-            .card-title {
-                font-size: 1.1rem;
-            }
-            
-            .btn {
-                padding: 0.75rem 1rem;
-                font-size: 1rem;
-            }
-            
-            .container {
-                padding-left: 12px;
-                padding-right: 12px;
-            }
-            
-            .py-5 {
-                padding-top: 1.5rem !important;
-                padding-bottom: 1.5rem !important;
-            }
-            
-            .filtro-mensagens {
-                gap: 10px;
-                margin-bottom: 20px;
-            }
-            
-            .form-check label {
-                font-size: 0.9rem;
-            }
-        }
-        
-        @media (max-width: 399.98px) {
-            .navbar-brand span {
-                display: none;
-            }
-            
-            .navbar-brand .bi {
-                font-size: 1.25rem !important;
-            }
-            
-            .py-5 {
-                padding-top: 1rem !important;
-                padding-bottom: 1rem !important;
-            }
-            
-            .container {
-                padding-left: 8px;
-                padding-right: 8px;
-            }
-            
-            h3 {
-                font-size: 1.1rem;
-            }
-            
-            .card-title {
-                font-size: 1rem;
-            }
-            
-            .btn {
-                font-size: 0.9rem;
-            }
-            
-            .filtro-mensagens {
-                margin-bottom: 15px;
-            }
+        .alert-info {
+            background: #eaf1fb;
+            color: #23395d;
         }
     </style>
 </head>
-<body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-custom shadow-sm mb-4">
+<body class="bg-primary bg-gradient bg-opacity-25 min-vh-100">
+    <!-- Navbar Bootstrap -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-gradient shadow-sm mb-4" style="background: linear-gradient(135deg, #23395d 0%, #4f6d7a 100%)">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="#">
                 <i class="bi bi-mortarboard-fill me-2 fs-3" style="color: #f7c948;"></i>
@@ -349,16 +167,15 @@ $result_mensagens = $conn->query($sql_mensagens);
                         <a class="nav-link" href="problema_aluno.php"><i class="bi bi-tools me-1"></i>Enviar Problema</a>
                     </li>
                     <li class="nav-item">
-                        <button class="btn btn-danger ms-2" onclick="window.location.href='../../src/logout.php'"><i class="bi bi-box-arrow-right me-1"></i>Sair</button>
+                        <button class="btn btn-danger ms-lg-2 mt-2 mt-lg-0" onclick="window.location.href='../../src/logout.php'"><i class="bi bi-box-arrow-right me-1"></i>Sair</button>
                     </li>
                 </ul>
             </div>
         </div>
     </nav>
-
     <!-- Filtro de mensagens -->
-    <div class="container">
-        <form method="get" class="filtro-mensagens mb-4">
+    <div class="container mb-4">
+        <form method="get" class="row row-cols-1 row-cols-md-auto g-2 align-items-center justify-content-center">
             <div class="form-check form-check-inline">
                 <input class="form-check-input" type="radio" name="filtro" id="filtro_nao_lidas" value="nao_lidas" <?php if($filtro==='nao_lidas') echo 'checked'; ?>>
                 <label class="form-check-label" for="filtro_nao_lidas">Não lidas</label>
@@ -371,13 +188,15 @@ $result_mensagens = $conn->query($sql_mensagens);
                 <input class="form-check-input" type="radio" name="filtro" id="filtro_antigas" value="antigas" <?php if($filtro==='antigas') echo 'checked'; ?>>
                 <label class="form-check-label" for="filtro_antigas">Antigas</label>
             </div>
-            <button type="submit" class="btn btn-primary ms-3">Filtrar</button>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-funnel me-1"></i>Filtrar</button>
+            </div>
         </form>
     </div>
-
     <!-- Conteúdo Principal -->
-    <div class="container py-5">
-        <h3 class="text-center mb-5"><i class="bi bi-chat-dots me-2"></i>
+    <div class="container py-4">
+        <h3 class="text-center mb-4 bg-title">
+            <i class="bi bi-chat-dots me-2"></i>
             <?php
                 if ($filtro === 'lidas') echo "Mensagens já lidas";
                 elseif ($filtro === 'antigas') echo "Mensagens antigas";
@@ -387,22 +206,24 @@ $result_mensagens = $conn->query($sql_mensagens);
         <div class="row g-4">
             <?php if ($result_mensagens && $result_mensagens->num_rows > 0): ?>
                 <?php while ($msg = $result_mensagens->fetch_assoc()): ?>
-                    <div class="col-12 col-sm-6 col-lg-4">
-                        <div class="card p-3 h-100">
-                            <h5 class="card-title"><?php echo htmlspecialchars($msg['assunto']); ?></h5>
-                            <p class="card-text"><?php echo nl2br(htmlspecialchars($msg['mensagem'])); ?></p>
-                            <p class="text-muted small">
-                                Enviado por: <?php echo htmlspecialchars($msg['remetente']); ?><br>
-                                Data: <?php echo date('d/m/Y H:i', strtotime($msg['data_envio'])); ?>
-                            </p>
-                            <?php if($filtro === 'nao_lidas'): ?>
-                            <form action="../../src/marcar_mensagem_lida.php" method="POST">
-                                <input type="hidden" name="id_mensagem" value="<?php echo $msg['id_mensagem']; ?>">
-                                <button type="submit" class="btn btn-success w-100 mt-2">
-                                    <i class="bi bi-check2-circle"></i> Marcar como lida
-                                </button>
-                            </form>
-                            <?php endif; ?>
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title mb-2 text-primary-emphasis"><?php echo htmlspecialchars($msg['assunto']); ?></h5>
+                                <p class="card-text flex-grow-1"><?php echo nl2br(htmlspecialchars($msg['mensagem'])); ?></p>
+                                <p class="text-muted small mb-2">
+                                    <span><i class="bi bi-person-circle me-1"></i><?php echo htmlspecialchars($msg['remetente']); ?></span><br>
+                                    <span><i class="bi bi-calendar-event me-1"></i><?php echo date('d/m/Y H:i', strtotime($msg['data_envio'])); ?></span>
+                                </p>
+                                <?php if($filtro === 'nao_lidas'): ?>
+                                <form action="../../src/marcar_mensagem_lida.php" method="POST">
+                                    <input type="hidden" name="id_mensagem" value="<?php echo $msg['id_mensagem']; ?>">
+                                    <button type="submit" class="btn btn-success w-100 mt-2">
+                                        <i class="bi bi-check2-circle"></i> Marcar como lida
+                                    </button>
+                                </form>
+                                <?php endif; ?>
+                            </div>
                         </div>
                     </div>
                 <?php endwhile; ?>
@@ -413,7 +234,6 @@ $result_mensagens = $conn->query($sql_mensagens);
             <?php endif; ?>
         </div>
     </div>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
