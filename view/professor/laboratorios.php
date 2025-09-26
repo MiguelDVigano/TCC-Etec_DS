@@ -329,3 +329,9 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
 </body>
 
 </html>
+<!-- Botão "+" fixo no canto inferior esquerdo -->
+<a href="adicionar_lab.php" 
+   style="position: fixed; left: 32px; bottom: 32px; z-index: 9999; background: #f7c948; color: #fff; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: flex-start; justify-content: center; font-size: 2.5rem; box-shadow: 0 4px 24px rgba(35,57,93,0.2); text-decoration: none; border: 1px solid #23395d;"
+   title="Adicionar Laboratório">
+    <span style="display: flex; align-items: flex-start; justify-content: center; width: 100%; height: 100%; font-size: 2.2rem; line-height: 1; margin-top: 7px;">+</span>
+</a>
