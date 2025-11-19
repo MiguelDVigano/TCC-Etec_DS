@@ -1,5 +1,22 @@
+<?php
+session_set_cookie_params([
+    'lifetime' => 3600, // 1 hora
+    'path' => '/',
+    'domain' => '', // Deixe vazio para usar o domínio atual
+    'secure' => false, // Use true se estiver usando HTTPS
+    'httponly' => true,
+    'samesite' => 'Lax' // Ou 'Strict' dependendo do caso
+]);
+session_start();
+if (!isset($_SESSION["id_usuario"]) || $_SESSION["tipo_usuario"] !== "Professor") {
+    header("Location: ../Login.html");
+    exit();
+}
+?>
+
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <title>Adicionar Laboratório</title>
@@ -10,6 +27,7 @@
             background: linear-gradient(135deg, #23395d 0%, #4f6d7a 100%) !important;
             min-height: 100vh;
         }
+
         .card {
             background: rgba(247, 249, 250, 0.97) !important;
             border-radius: 12px !important;
@@ -17,17 +35,20 @@
             border: none !important;
             backdrop-filter: blur(10px);
         }
+
         .btn-primary {
             background: linear-gradient(135deg, #23395d 0%, #4f6d7a 100%) !important;
             border: none !important;
             border-radius: 7px !important;
             font-weight: 600;
         }
+
         .btn-primary:hover {
             background: linear-gradient(135deg, #1c2d47 0%, #425965 100%) !important;
         }
     </style>
 </head>
+
 <body>
     <div class="container d-flex justify-content-center align-items-center min-vh-100">
         <div class="card p-4 shadow" style="min-width:350px; max-width:450px; width:100%;">
@@ -75,4 +96,5 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>
