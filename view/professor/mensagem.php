@@ -1,4 +1,12 @@
 <?php
+session_set_cookie_params([
+    'lifetime' => 3600, // 1 hora
+    'path' => '/',
+    'domain' => '', // Deixe vazio para usar o domínio atual
+    'secure' => false, // Use true se estiver usando HTTPS
+    'httponly' => true,
+    'samesite' => 'Lax' // Ou 'Strict' dependendo do caso
+]);
 session_start();
 
 if (!isset($_SESSION["id_usuario"]) || $_SESSION["tipo_usuario"] !== "Professor") {

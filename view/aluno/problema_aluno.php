@@ -1,4 +1,12 @@
 <?php
+session_set_cookie_params([
+  'lifetime' => 3600, // 1 hora
+  'path' => '/',
+  'domain' => '', // Deixe vazio para usar o domínio atual
+  'secure' => false, // Use true se estiver usando HTTPS
+  'httponly' => true,
+  'samesite' => 'Lax' // Ou 'Strict' dependendo do caso
+]);
 session_start();
 if (!isset($_SESSION["id_usuario"]) || $_SESSION["tipo_usuario"] !== "Aluno") {
     header("Location: ../Login.html");
@@ -145,7 +153,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <h3 class="card-title text-center mb-4 fs-4 fs-md-3">
               <i class="bi bi-tools me-2"></i>Reportar Defeito
             </h3>
-            <form action="" method="POST" enctype="multipart/form-data">
+            <form action="../../src/salvar_chamado.php" method="POST" enctype="multipart/form-data">
               <div class="mb-3">
                 <label for="laboratorio" class="form-label">Selecione o Laboratório</label>
                 <select class="form-select" id="laboratorio" name="id_sala" required>

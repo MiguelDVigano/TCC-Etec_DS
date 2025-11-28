@@ -1,4 +1,12 @@
 <?php
+session_set_cookie_params([
+    'lifetime' => 3600, // 1 hora
+    'path' => '/',
+    'domain' => '', // Deixe vazio para usar o domínio atual
+    'secure' => false, // Use true se estiver usando HTTPS
+    'httponly' => true,
+    'samesite' => 'Lax' // Ou 'Strict' dependendo do caso
+]);
 session_start();
 if (!isset($_SESSION['id_usuario'])) {
     header("Location: ../view/Login.html");
@@ -81,8 +89,14 @@ $stmt->bind_param("ssssi", $titulo_chamado, $descricao, $url_foto, $today, $id_s
 $ok = $stmt->execute();
 $stmt->close();
 
-if ($_SESSION['tipo_usuario'] === 'professor') {
+
+if ($_SESSION['tipo_usuario'] === 'Professor') {
     header("Location: ../view/professor/problema_professor.php");
-} else if ($_SESSION['tipo_usuario'] === 'aluno') {
-    header("Location: ../view/professor/problema_aluno.php");
-};
+    exit();
+} else if ($_SESSION['tipo_usuario'] === 'Aluno') {
+    header("Location: ../view/aluno/problema_aluno.php");
+    exit();
+} else {
+    header("Location: ../view/professor/problema_professor.php?error=insert");
+    exit();
+}
