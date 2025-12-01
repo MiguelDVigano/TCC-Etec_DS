@@ -16,6 +16,121 @@ if (!isset($_SESSION["id_usuario"]) || $_SESSION["tipo_usuario"] !== "Professor"
 
 include '../../conexao.php';
 
+// --- NOVO: mapeamento de períodos para horários (ajuste conforme sua grade) ---
+$PERIODOS_HORARIOS = [
+    '1' => ['07:00:00', '07:50:00'],
+    '2' => ['07:50:00', '08:40:00'],
+    '3' => ['08:40:00', '09:30:00'],
+    '4' => ['09:50:00', '10:40:00'],
+    '5' => ['10:40:00', '11:30:00'],
+    '6' => ['11:30:00', '12:20:00'],
+];
+
+// --- NOVO: Endpoints AJAX no mesmo arquivo ---
+if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
+    header('Content-Type: application/json; charset=utf-8');
+
+    // Ajuste nomes da tabela/colunas abaixo conforme seu banco.
+    $tabelaReservas = 'reserva_laboratorio'; // ex.: reserva_laboratorio
+    $colIdReserva   = 'id_reserva';
+    $colIdSala      = 'id_sala';
+    $colIdProf      = 'id_professor';
+    $colData        = 'data_reserva';
+    $colInicio      = 'hora_inicio';
+    $colFim         = 'hora_fim';
+
+    $action  = $_GET['action'] ?? '';
+    $data    = $_GET['data'] ?? '';
+    $periodo = $_GET['periodo'] ?? '';
+    $idProf  = $_SESSION['id_usuario'];
+
+    // Converte período em hora início/fim (se informado)
+    $horaInicio = null;
+    $horaFim = null;
+    if ($periodo && isset($PERIODOS_HORARIOS[$periodo])) {
+        [$horaInicio, $horaFim] = $PERIODOS_HORARIOS[$periodo];
+    }
+
+    try {
+        if ($action === 'disponiveis') {
+            if (!$data || !$horaInicio || !$horaFim) {
+                echo json_encode(['ok' => false, 'error' => 'Data e período são obrigatórios.']);
+                exit;
+            }
+            // Lista laboratórios sem sobreposição no horário solicitado
+            $sql = "
+                SELECT s.id_sala, s.titulo_sala
+                FROM sala s
+                WHERE NOT EXISTS (
+                    SELECT 1
+                    FROM {$tabelaReservas} r
+                    WHERE r.{$colIdSala} = s.id_sala
+                      AND r.{$colData} = ?
+                      AND NOT (r.{$colFim} <= ? OR r.{$colInicio} >= ?)
+                )
+                ORDER BY s.titulo_sala ASC
+            ";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param('sss', $data, $horaInicio, $horaFim);
+            $stmt->execute();
+            $res = $stmt->get_result();
+            $rows = [];
+            while ($row = $res->fetch_assoc()) {
+                $rows[] = [
+                    'id_sala' => $row['id_sala'],
+                    'titulo_sala' => $row['titulo_sala']
+                ];
+            }
+            echo json_encode(['ok' => true, 'data' => $rows]);
+            exit;
+        }
+
+        if ($action === 'minhas_reservas') {
+            // NOVO: data agora é opcional; se não informada, retorna TODAS as reservas do professor
+            $params = [$idProf];
+            $types  = 'i';
+            $where  = "WHERE r.{$colIdProf} = ?";
+
+            if (!empty($data)) {
+                $where .= " AND r.{$colData} = ?";
+                $types .= 's';
+                $params[] = $data;
+
+                if ($horaInicio && $horaFim) {
+                    $where .= " AND NOT (r.{$colFim} <= ? OR r.{$colInicio} >= ?)";
+                    $types .= 'ss';
+                    $params[] = $horaInicio;
+                    $params[] = $horaFim;
+                }
+            }
+
+            $sql = "
+                SELECT r.{$colIdReserva} as id_reserva, s.titulo_sala, r.{$colData} as data_reserva,
+                       r.{$colInicio} as hora_inicio, r.{$colFim} as hora_fim
+                FROM {$tabelaReservas} r
+                INNER JOIN sala s ON s.id_sala = r.{$colIdSala}
+                {$where}
+                ORDER BY r.{$colData} ASC, r.{$colInicio} ASC
+            ";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param($types, ...$params);
+            $stmt->execute();
+            $res = $stmt->get_result();
+            $rows = [];
+            while ($row = $res->fetch_assoc()) {
+                $rows[] = $row;
+            }
+            echo json_encode(['ok' => true, 'data' => $rows]);
+            exit;
+        }
+
+        echo json_encode(['ok' => false, 'error' => 'Ação inválida.']);
+    } catch (Throwable $e) {
+        echo json_encode(['ok' => false, 'error' => 'Falha ao processar a solicitação.']);
+    }
+    exit;
+}
+
 // Buscar laboratórios
 $sql = "SELECT * FROM sala";
 $result = $conn->query($sql);
@@ -94,6 +209,10 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
             position: relative;
             z-index: 1;
         }
+        /* NOVO: estilos do pré-filtro */
+        .prefiltro-card { background: rgba(247, 249, 250, 0.95) !important; border-radius: 12px; box-shadow: 0 4px 24px rgba(35, 57, 93, 0.2) !important; border: none; }
+        .prefiltro-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+        .hidden { display: none !important; }
     </style>
 </head>
 
@@ -128,10 +247,53 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
     </nav>
 
     <div class="container py-4">
-        <div class="row g-4 justify-content-center">
+        <!-- NOVO: Pré-filtro -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card prefiltro-card p-3">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-12 col-md-4">
+                            <label class="form-label fw-semibold">Data</label>
+                            <input type="date" class="form-control" id="pf-data" />
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label class="form-label fw-semibold">Período da aula</label>
+                            <select class="form-select" id="pf-periodo">
+                                <option value="">Selecione</option>
+                                <option value="1">1ª aula</option>
+                                <option value="2">2ª aula</option>
+                                <option value="3">3ª aula</option>
+                                <option value="4">4ª aula</option>
+                                <option value="5">5ª aula</option>
+                                <option value="6">6ª aula</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <div class="prefiltro-actions">
+                                <button type="button" class="btn btn-primary" id="pf-ver-disponiveis">
+                                    <i class="bi bi-eye me-1"></i>Ver disponíveis
+                                </button>
+                                <button type="button" class="btn btn-success" id="pf-minhas-reservas">
+                                    <i class="bi bi-person-check me-1"></i>Minhas reservas
+                                </button>
+                                <button type="button" class="btn btn-secondary" id="pf-limpar">
+                                    <i class="bi bi-eraser me-1"></i>Limpar filtro
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <small id="pf-resultado" class="text-muted"></small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grid de Laboratórios (inicialmente OCULTA) -->
+        <div class="row g-4 justify-content-center hidden" id="grid-labs">
             <?php if ($result->num_rows > 0): ?>
                 <?php while ($lab = $result->fetch_assoc()): ?>
-                    <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                    <div class="col-12 col-sm-6 col-md-4 col-lg-3 lab-card" data-id-sala="<?= $lab['id_sala'] ?>">
                         <div class="card shadow-sm h-100">
                             <div class="card-body d-flex flex-column">
                                 <h5 class="card-title mb-3">
@@ -263,6 +425,30 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
             </form>
         </div>
     </div>
+
+    <!-- NOVO: Modal Minhas Reservas -->
+    <div class="modal fade" id="modalMinhasReservas" tabindex="-1" aria-labelledby="modalMinhasReservasLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalMinhasReservasLabel">
+                        <i class="bi bi-person-check me-2"></i>Minhas reservas
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body" id="minhas-reservas-body">
+                    <!-- NOVO texto padrão -->
+                    <div class="text-muted">Clique em "Minhas reservas" para ver todas as suas reservas. Use a data para filtrar, se desejar.</div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-lg me-1"></i>Fechar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         var modalReserva = document.getElementById('modalReserva');
@@ -333,6 +519,100 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
                     });
                 });
         });
+
+        // NOVO: Lógica do pré-filtro
+        const pfData = document.getElementById('pf-data');
+        const pfPeriodo = document.getElementById('pf-periodo');
+        const pfVerDisp = document.getElementById('pf-ver-disponiveis');
+        const pfMinhasReservas = document.getElementById('pf-minhas-reservas');
+        const pfLimpar = document.getElementById('pf-limpar');
+        const pfResultado = document.getElementById('pf-resultado');
+        const gridLabs = document.getElementById('grid-labs');
+
+        function resetFiltro() {
+            // Oculta a grid e limpa mensagens/filtros
+            gridLabs.classList.add('hidden');
+            pfResultado.textContent = '';
+            pfData.value = '';
+            pfPeriodo.value = '';
+            // Prepara todos os cards para próximo filtro
+            document.querySelectorAll('.lab-card').forEach(card => card.classList.remove('hidden'));
+        }
+
+        pfLimpar.addEventListener('click', resetFiltro);
+
+        pfVerDisp.addEventListener('click', async () => {
+            const data = pfData.value;
+            const periodo = pfPeriodo.value;
+            if (!data || !periodo) {
+                pfResultado.textContent = 'Informe data e período.';
+                gridLabs.classList.add('hidden');
+                return;
+            }
+            pfResultado.textContent = 'Carregando laboratórios disponíveis...';
+            try {
+                const qs = new URLSearchParams({ ajax: '1', action: 'disponiveis', data, periodo });
+                const res = await fetch(`./laboratorios.php?${qs.toString()}`, { headers: { 'Accept': 'application/json' } });
+                const json = await res.json();
+                if (!json.ok) throw new Error(json.error || 'Falha ao consultar');
+                const idsDisponiveis = new Set(json.data.map(i => String(i.id_sala)));
+                let visiveis = 0;
+                document.querySelectorAll('.lab-card').forEach(card => {
+                    const idSala = card.getAttribute('data-id-sala');
+                    if (idsDisponiveis.has(idSala)) {
+                        card.classList.remove('hidden');
+                        visiveis++;
+                    } else {
+                        card.classList.add('hidden');
+                    }
+                });
+                if (visiveis > 0) {
+                    gridLabs.classList.remove('hidden');
+                    pfResultado.textContent = `${visiveis} laboratório(s) disponível(is) no período selecionado.`;
+                } else {
+                    gridLabs.classList.add('hidden');
+                    pfResultado.textContent = 'Nenhum laboratório disponível no período selecionado.';
+                }
+            } catch (e) {
+                gridLabs.classList.add('hidden');
+                pfResultado.textContent = 'Erro ao carregar disponíveis.';
+            }
+        });
+
+        pfMinhasReservas.addEventListener('click', async () => {
+            // NOVO: data não é obrigatória; se informada, apenas filtra
+            const data = pfData.value;
+            const periodo = pfPeriodo.value;
+            pfResultado.textContent = 'Carregando suas reservas...';
+            const qs = new URLSearchParams({ ajax: '1', action: 'minhas_reservas' });
+            if (data) qs.append('data', data);
+            if (data && periodo) qs.append('periodo', periodo); // período só se tiver data
+            try {
+                const res = await fetch(`./laboratorios.php?${qs.toString()}`, { headers: { 'Accept': 'application/json' } });
+                const json = await res.json();
+                const body = document.getElementById('minhas-reservas-body');
+                if (!json.ok) {
+                    body.innerHTML = `<div class="text-danger">${json.error || 'Falha ao consultar'}</div>`;
+                } else if (!json.data || json.data.length === 0) {
+                    body.innerHTML = '<div class="text-muted">Nenhuma reserva encontrada.</div>';
+                } else {
+                    const items = json.data.map(r =>
+                        `<li class="list-group-item">
+                            <div><strong>${r.titulo_sala || 'Laboratório'}</strong></div>
+                            <small class="text-muted">${r.data_reserva} — ${r.hora_inicio} às ${r.hora_fim}</small>
+                         </li>`
+                    ).join('');
+                    body.innerHTML = `<ul class="list-group">${items}</ul>`;
+                }
+                new bootstrap.Modal(document.getElementById('modalMinhasReservas')).show();
+                pfResultado.textContent = '';
+            } catch (e) {
+                pfResultado.textContent = 'Erro ao carregar suas reservas.';
+            }
+        });
+
+        // Inicial: garantir grid oculta
+        gridLabs.classList.add('hidden');
     </script>
 </body>
 
