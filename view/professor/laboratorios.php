@@ -31,7 +31,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
     header('Content-Type: application/json; charset=utf-8');
 
     // Ajuste nomes da tabela/colunas abaixo conforme seu banco.
-    $tabelaReservas = 'reserva_laboratorio'; // ex.: reserva_laboratorio
+    $tabelaReservas = 'reserva'; // ex.: reserva_laboratorio
     $colIdReserva   = 'id_reserva';
     $colIdSala      = 'id_sala';
     $colIdProf      = 'id_professor';
