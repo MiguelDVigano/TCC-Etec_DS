@@ -8,7 +8,7 @@ session_set_cookie_params([
     'samesite' => 'Lax' // Ou 'Strict' dependendo do caso
 ]);
 session_start();
-include '../conexao.php';
+include '../controller/conexao.php';
 
 $id_mensagem = $_POST['id_mensagem'] ?? null;
 $id_aluno = $_SESSION['id_usuario'] ?? null;

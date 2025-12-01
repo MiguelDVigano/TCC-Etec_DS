@@ -1,5 +1,5 @@
 <?php
-include "../conexao.php";
+include "../controller/conexao.php";
 session_set_cookie_params([
     'lifetime' => 3600, // 1 hora
     'path' => '/',

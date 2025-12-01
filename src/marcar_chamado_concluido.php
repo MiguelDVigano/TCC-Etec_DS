@@ -1,5 +1,5 @@
 <?php
-require_once '../conexao.php';
+require_once '../controller/conexao.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_chamado'])) {
     $id_chamado = intval($_POST['id_chamado']);

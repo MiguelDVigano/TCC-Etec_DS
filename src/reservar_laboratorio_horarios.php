@@ -1,5 +1,5 @@
 <?php
-include '../conexao.php';
+include '../controller/conexao.php';
 
 $id_sala = isset($_GET['id_sala']) ? intval($_GET['id_sala']) : 0;
 $data_reserva = isset($_GET['data_reserva']) ? $_GET['data_reserva'] : '';

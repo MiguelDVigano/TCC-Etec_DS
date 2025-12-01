@@ -7,7 +7,7 @@ session_set_cookie_params([
     'httponly' => true,
     'samesite' => 'Lax' // Ou 'Strict' dependendo do caso
 ]);
-include("../conexao.php");
+include("../controller/conexao.php");
 
 // coletar os campos do formulário
 $email = $_POST['email'];

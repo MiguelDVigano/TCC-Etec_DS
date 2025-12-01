@@ -12,7 +12,7 @@ if (!isset($_SESSION["id_usuario"]) || $_SESSION["tipo_usuario"] !== "Aluno") {
     header("Location: ../Login.html");
     exit();
 }
-include '../../conexao.php';
+include '../../controller/conexao.php';
 
 // Buscar turmas do aluno
 $id_aluno = $_SESSION["id_usuario"];

@@ -13,7 +13,7 @@ if (!isset($_SESSION['id_usuario'])) {
     exit();
 }
 
-require_once '../conexao.php';
+require_once '../controller/conexao.php';
 
 // Apenas aceitar POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {

@@ -13,7 +13,7 @@ if (!isset($_SESSION["id_usuario"]) || $_SESSION["tipo_usuario"] !== "Manutencao
     exit();
 }
 
-require_once '../../conexao.php';
+require_once '../../controller/conexao.php';
 
 // Verifica se a coluna data_conclusao existe na tabela chamado
 $hasDataConclusao = false;

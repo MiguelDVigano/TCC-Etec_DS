@@ -1,12 +1,4 @@
 <?php
-session_set_cookie_params([
-    'lifetime' => 3600, // 1 hora
-    'path' => '/',
-    'domain' => '', // Deixe vazio para usar o domínio atual
-    'secure' => false, // Use true se estiver usando HTTPS
-    'httponly' => true,
-    'samesite' => 'Lax' // Ou 'Strict' dependendo do caso
-]);
 session_start();
 
 if (!isset($_SESSION["id_usuario"]) || $_SESSION["tipo_usuario"] !== "Professor") {
@@ -14,131 +6,125 @@ if (!isset($_SESSION["id_usuario"]) || $_SESSION["tipo_usuario"] !== "Professor"
     exit();
 }
 
-include '../../conexao.php';
+include '../../controller/conexao.php';
 
-// --- NOVO: mapeamento de períodos para horários (ajuste conforme sua grade) ---
+/* ===============================
+   ✅ GRADE OFICIAL POR PERÍODO
+================================ */
 $PERIODOS_HORARIOS = [
-    '1' => ['07:00:00', '07:50:00'],
-    '2' => ['07:50:00', '08:40:00'],
-    '3' => ['08:40:00', '09:30:00'],
-    '4' => ['09:50:00', '10:40:00'],
-    '5' => ['10:40:00', '11:30:00'],
-    '6' => ['11:30:00', '12:20:00'],
+    '1' => ['07:10:00', '08:00:00'],
+    '2' => ['08:00:00', '08:50:00'],
+    '3' => ['08:50:00', '09:40:00'],
+    // 09:40–10:00 intervalo
+    '4' => ['10:00:00', '10:50:00'],
+    '5' => ['10:50:00', '11:40:00'],
+    '6' => ['11:40:00', '12:30:00'],
+    // 12:30–13:30 almoço
+    '7' => ['13:30:00', '14:20:00'],
+    '8' => ['14:20:00', '15:10:00'],
+    '9' => ['15:10:00', '16:00:00'],
 ];
 
-// --- NOVO: Endpoints AJAX no mesmo arquivo ---
+/* ===============================
+   ✅ AJAX NO MESMO ARQUIVO
+================================ */
 if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
     header('Content-Type: application/json; charset=utf-8');
 
-    // Ajuste nomes da tabela/colunas abaixo conforme seu banco.
-    $tabelaReservas = 'reserva'; // ex.: reserva_laboratorio
-    $colIdReserva   = 'id_reserva';
-    $colIdSala      = 'id_sala';
-    $colIdProf      = 'id_professor';
-    $colData        = 'data_reserva';
-    $colInicio      = 'hora_inicio';
-    $colFim         = 'hora_fim';
-
-    $action  = $_GET['action'] ?? '';
-    $data    = $_GET['data'] ?? '';
+    $action = $_GET['action'] ?? '';
+    $data = $_GET['data'] ?? '';
     $periodo = $_GET['periodo'] ?? '';
-    $idProf  = $_SESSION['id_usuario'];
+    $idProf = $_SESSION['id_usuario'];
 
-    // Converte período em hora início/fim (se informado)
-    $horaInicio = null;
-    $horaFim = null;
     if ($periodo && isset($PERIODOS_HORARIOS[$periodo])) {
         [$horaInicio, $horaFim] = $PERIODOS_HORARIOS[$periodo];
+    } else {
+        $horaInicio = null;
+        $horaFim = null;
     }
 
     try {
+
+        /* ===== LABS DISPONÍVEIS POR PERÍODO ===== */
         if ($action === 'disponiveis') {
+
             if (!$data || !$horaInicio || !$horaFim) {
-                echo json_encode(['ok' => false, 'error' => 'Data e período são obrigatórios.']);
+                echo json_encode(['ok' => false, 'error' => 'Data e período obrigatórios']);
                 exit;
             }
-            // Lista laboratórios sem sobreposição no horário solicitado
+
             $sql = "
                 SELECT s.id_sala, s.titulo_sala
                 FROM sala s
-                WHERE NOT EXISTS (
+                WHERE s.status_sala = 'Ativa'
+                AND NOT EXISTS (
                     SELECT 1
-                    FROM {$tabelaReservas} r
-                    WHERE r.{$colIdSala} = s.id_sala
-                      AND r.{$colData} = ?
-                      AND NOT (r.{$colFim} <= ? OR r.{$colInicio} >= ?)
+                    FROM reserva r
+                    WHERE r.id_sala = s.id_sala
+                      AND r.data_reserva = ?
+                      AND NOT (
+                            r.hora_fim <= ?
+                         OR r.hora_inicio >= ?
+                      )
                 )
                 ORDER BY s.titulo_sala ASC
             ";
+
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param('sss', $data, $horaInicio, $horaFim);
+            $stmt->bind_param("sss", $data, $horaInicio, $horaFim);
             $stmt->execute();
             $res = $stmt->get_result();
-            $rows = [];
-            while ($row = $res->fetch_assoc()) {
-                $rows[] = [
-                    'id_sala' => $row['id_sala'],
-                    'titulo_sala' => $row['titulo_sala']
-                ];
-            }
-            echo json_encode(['ok' => true, 'data' => $rows]);
-            exit;
-        }
 
-        if ($action === 'minhas_reservas') {
-            // NOVO: data agora é opcional; se não informada, retorna TODAS as reservas do professor
-            $params = [$idProf];
-            $types  = 'i';
-            $where  = "WHERE r.{$colIdProf} = ?";
-
-            if (!empty($data)) {
-                $where .= " AND r.{$colData} = ?";
-                $types .= 's';
-                $params[] = $data;
-
-                if ($horaInicio && $horaFim) {
-                    $where .= " AND NOT (r.{$colFim} <= ? OR r.{$colInicio} >= ?)";
-                    $types .= 'ss';
-                    $params[] = $horaInicio;
-                    $params[] = $horaFim;
-                }
-            }
-
-            $sql = "
-                SELECT r.{$colIdReserva} as id_reserva, s.titulo_sala, r.{$colData} as data_reserva,
-                       r.{$colInicio} as hora_inicio, r.{$colFim} as hora_fim
-                FROM {$tabelaReservas} r
-                INNER JOIN sala s ON s.id_sala = r.{$colIdSala}
-                {$where}
-                ORDER BY r.{$colData} ASC, r.{$colInicio} ASC
-            ";
-            $stmt = $conn->prepare($sql);
-            $stmt->bind_param($types, ...$params);
-            $stmt->execute();
-            $res = $stmt->get_result();
             $rows = [];
             while ($row = $res->fetch_assoc()) {
                 $rows[] = $row;
             }
+
             echo json_encode(['ok' => true, 'data' => $rows]);
             exit;
         }
 
-        echo json_encode(['ok' => false, 'error' => 'Ação inválida.']);
+        /* ===== MINHAS RESERVAS ===== */
+        if ($action === 'minhas_reservas') {
+
+            $sql = "
+                SELECT r.id_reserva, s.titulo_sala, r.data_reserva,
+                       r.hora_inicio, r.hora_fim
+                FROM reserva r
+                INNER JOIN sala s ON s.id_sala = r.id_sala
+                WHERE r.id_professor = ?
+                ORDER BY r.data_reserva, r.hora_inicio
+            ";
+
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("i", $idProf);
+            $stmt->execute();
+            $res = $stmt->get_result();
+
+            $rows = [];
+            while ($row = $res->fetch_assoc()) {
+                $rows[] = $row;
+            }
+
+            echo json_encode(['ok' => true, 'data' => $rows]);
+            exit;
+        }
+
+        echo json_encode(['ok' => false, 'error' => 'Ação inválida']);
+        exit;
+
     } catch (Throwable $e) {
-        echo json_encode(['ok' => false, 'error' => 'Falha ao processar a solicitação.']);
+        echo json_encode(['ok' => false, 'error' => 'Erro interno']);
+        exit;
     }
-    exit;
 }
 
-// Buscar laboratórios
-$sql = "SELECT * FROM sala";
-$result = $conn->query($sql);
-
-// Buscar turmas e professores para o formulário
+/* ===== LISTAGEM NORMAL ===== */
+$result = $conn->query("SELECT * FROM sala");
 $turmas = $conn->query("SELECT id_turma, nome_turma FROM turma");
 $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuario WHERE tipo_usuario = 'Professor'");
 ?>
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 
@@ -153,19 +139,27 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
             background: linear-gradient(135deg, #23395d 0%, #4f6d7a 100%) !important;
             min-height: 100vh;
         }
+
         .navbar {
             background: linear-gradient(135deg, #23395d 0%, #4f6d7a 100%) !important;
             border-radius: 12px;
         }
-        .navbar .navbar-brand, .navbar .nav-link, .navbar .navbar-toggler {
+
+        .navbar .navbar-brand,
+        .navbar .nav-link,
+        .navbar .navbar-toggler {
             color: #fff !important;
         }
-        .navbar .nav-link.active, .navbar .nav-link:focus {
+
+        .navbar .nav-link.active,
+        .navbar .nav-link:focus {
             color: #f7c948 !important;
         }
+
         .navbar .nav-link.disabled {
             color: #bfc9d1 !important;
         }
+
         .card {
             background: rgba(247, 249, 250, 0.95) !important;
             border-radius: 12px !important;
@@ -173,10 +167,13 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
             border: none !important;
             backdrop-filter: blur(10px);
         }
-        .card-title, h3 {
+
+        .card-title,
+        h3 {
             color: #23395d !important;
             font-weight: 700;
         }
+
         .btn-danger {
             background: linear-gradient(135deg, #a93226 0%, #922b21 100%) !important;
             color: #fff !important;
@@ -184,62 +181,88 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
             border-radius: 7px !important;
             font-weight: 600;
         }
+
         .btn-danger:hover {
             background: linear-gradient(135deg, #922b21 0%, #7d251c 100%) !important;
         }
+
         .btn-success {
             background: linear-gradient(135deg, #28a745 0%, #20754a 100%) !important;
             border: none !important;
             border-radius: 7px !important;
             font-weight: 600;
         }
+
         .btn-success:hover {
             background: linear-gradient(135deg, #20754a 0%, #1a5f3a 100%) !important;
         }
+
         .btn-primary {
             background: linear-gradient(135deg, #23395d 0%, #4f6d7a 100%) !important;
             border: none !important;
             border-radius: 7px !important;
             font-weight: 600;
         }
+
         .btn-primary:hover {
             background: linear-gradient(135deg, #1c2d47 0%, #425965 100%) !important;
         }
+
         .container {
             position: relative;
             z-index: 1;
         }
+
         /* NOVO: estilos do pré-filtro */
-        .prefiltro-card { background: rgba(247, 249, 250, 0.95) !important; border-radius: 12px; box-shadow: 0 4px 24px rgba(35, 57, 93, 0.2) !important; border: none; }
-        .prefiltro-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-        .hidden { display: none !important; }
+        .prefiltro-card {
+            background: rgba(247, 249, 250, 0.95) !important;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(35, 57, 93, 0.2) !important;
+            border: none;
+        }
+
+        .prefiltro-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .hidden {
+            display: none !important;
+        }
     </style>
 </head>
 
 <body class="min-vh-100">
     <!-- Navbar Bootstrap -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-gradient shadow-sm mb-4" style="background: linear-gradient(135deg, #23395d 0%, #4f6d7a 100%)">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-gradient shadow-sm mb-4"
+        style="background: linear-gradient(135deg, #23395d 0%, #4f6d7a 100%)">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="#">
                 <i class="bi bi-mortarboard-fill me-2 fs-3" style="color: #f7c948;"></i>
                 <span class="fw-bold">Sistema Escolar Etec</span>
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarProfessor" aria-controls="navbarProfessor" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarProfessor"
+                aria-controls="navbarProfessor" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarProfessor">
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link active fw-bold" href="#"><i class="bi bi-pc-display-horizontal me-1"></i>Laboratórios</a>
+                        <a class="nav-link active fw-bold" href="#"><i
+                                class="bi bi-pc-display-horizontal me-1"></i>Laboratórios</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="mensagem.php"><i class="bi bi-chat-dots me-1"></i>Mensagens</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="problema_professor.php"><i class="bi bi-tools me-1"></i>Enviar Problema</a>
+                        <a class="nav-link" href="problema_professor.php"><i class="bi bi-tools me-1"></i>Enviar
+                            Problema</a>
                     </li>
                     <li class="nav-item">
-                        <button class="btn btn-danger ms-lg-2 mt-2 mt-lg-0" onclick="window.location.href='../../src/logout.php'"><i class="bi bi-box-arrow-right me-1"></i>Sair</button>
+                        <button class="btn btn-danger ms-lg-2 mt-2 mt-lg-0"
+                            onclick="window.location.href='../../src/logout.php'"><i
+                                class="bi bi-box-arrow-right me-1"></i>Sair</button>
                     </li>
                 </ul>
             </div>
@@ -260,12 +283,15 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
                             <label class="form-label fw-semibold">Período da aula</label>
                             <select class="form-select" id="pf-periodo">
                                 <option value="">Selecione</option>
-                                <option value="1">1ª aula</option>
-                                <option value="2">2ª aula</option>
-                                <option value="3">3ª aula</option>
-                                <option value="4">4ª aula</option>
-                                <option value="5">5ª aula</option>
-                                <option value="6">6ª aula</option>
+                                <option value="1">1º período — 07:10 às 08:00</option>
+                                <option value="2">2º período — 08:00 às 08:50</option>
+                                <option value="3">3º período — 08:50 às 09:40</option>
+                                <option value="4">4º período — 10:00 às 10:50</option>
+                                <option value="5">5º período — 10:50 às 11:40</option>
+                                <option value="6">6º período — 11:40 às 12:30</option>
+                                <option value="7">7º período — 13:30 às 14:20</option>
+                                <option value="8">8º período — 14:20 às 15:10</option>
+                                <option value="9">9º período — 15:10 às 16:00</option>
                             </select>
                         </div>
                         <div class="col-12 col-md-4">
@@ -299,7 +325,7 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
                                 <h5 class="card-title mb-3">
                                     <i class="bi bi-door-closed me-2"></i><?= htmlspecialchars($lab['titulo_sala']) ?>
                                 </h5>
-                                
+
                                 <div class="mb-3 flex-grow-1">
                                     <div class="mb-2">
                                         <small class="text-muted">Número:</small>
@@ -322,10 +348,11 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
                                         ?>
                                     </div>
                                 </div>
-                                
+
                                 <div class="d-grid mt-auto">
                                     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalReserva"
-                                        data-id="<?= $lab['id_sala'] ?>" data-titulo="<?= htmlspecialchars($lab['titulo_sala']) ?>"
+                                        data-id="<?= $lab['id_sala'] ?>"
+                                        data-titulo="<?= htmlspecialchars($lab['titulo_sala']) ?>"
                                         data-status="<?= $lab['status_sala'] ?>">
                                         <i class="bi bi-calendar-plus me-1"></i>Reservar
                                     </button>
@@ -356,19 +383,19 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
                 </div>
                 <div class="modal-body">
                     <input type="hidden" name="id_sala" id="inputIdSala">
-                    
+
                     <div class="mb-3">
                         <label for="inputTituloSala" class="form-label fw-semibold">Laboratório</label>
                         <input type="text" class="form-control" id="inputTituloSala" readonly>
                     </div>
-                    
+
                     <div class="row g-3 mb-3">
                         <div class="col-12">
                             <label for="inputDataReserva" class="form-label fw-semibold">Data</label>
                             <input type="date" class="form-control" name="data_reserva" id="inputDataReserva" required>
                         </div>
                     </div>
-                    
+
                     <div class="row g-3 mb-3">
                         <div class="col-6">
                             <label class="form-label fw-semibold">Horário de Início</label>
@@ -383,7 +410,7 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
                             </select>
                         </div>
                     </div>
-                    
+
                     <div class="row g-3 mb-3">
                         <div class="col-6">
                             <label for="inputTurma" class="form-label fw-semibold">Turma</label>
@@ -392,7 +419,8 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
                                 <?php
                                 $turmas->data_seek(0);
                                 while ($turma = $turmas->fetch_assoc()): ?>
-                                    <option value="<?= $turma['id_turma'] ?>"><?= htmlspecialchars($turma['nome_turma']) ?></option>
+                                    <option value="<?= $turma['id_turma'] ?>"><?= htmlspecialchars($turma['nome_turma']) ?>
+                                    </option>
                                 <?php endwhile; ?>
                             </select>
                         </div>
@@ -403,15 +431,17 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
                                 <?php
                                 $professores->data_seek(0);
                                 while ($prof = $professores->fetch_assoc()): ?>
-                                    <option value="<?= $prof['id_professor'] ?>"><?= htmlspecialchars($prof['nome']) ?></option>
+                                    <option value="<?= $prof['id_professor'] ?>"><?= htmlspecialchars($prof['nome']) ?>
+                                    </option>
                                 <?php endwhile; ?>
                             </select>
                         </div>
                     </div>
-                    
+
                     <div class="mb-3">
                         <label for="inputObs" class="form-label fw-semibold">Observação</label>
-                        <textarea class="form-control" name="observacao" rows="3" placeholder="Observações sobre a reserva..."></textarea>
+                        <textarea class="form-control" name="observacao" rows="3"
+                            placeholder="Observações sobre a reserva..."></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -427,7 +457,8 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
     </div>
 
     <!-- NOVO: Modal Minhas Reservas -->
-    <div class="modal fade" id="modalMinhasReservas" tabindex="-1" aria-labelledby="modalMinhasReservasLabel" aria-hidden="true">
+    <div class="modal fade" id="modalMinhasReservas" tabindex="-1" aria-labelledby="modalMinhasReservasLabel"
+        aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
@@ -438,7 +469,8 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
                 </div>
                 <div class="modal-body" id="minhas-reservas-body">
                     <!-- NOVO texto padrão -->
-                    <div class="text-muted">Clique em "Minhas reservas" para ver todas as suas reservas. Use a data para filtrar, se desejar.</div>
+                    <div class="text-muted">Clique em "Minhas reservas" para ver todas as suas reservas. Use a data para
+                        filtrar, se desejar.</div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
@@ -459,7 +491,7 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
         var inputHoraFim = document.getElementById('inputHoraFim');
         var reservaBtnStatus = null;
 
-        modalReserva.addEventListener('show.bs.modal', function(event) {
+        modalReserva.addEventListener('show.bs.modal', function (event) {
             var button = event.relatedTarget;
             var idSala = button.getAttribute('data-id');
             var tituloSala = button.getAttribute('data-titulo');
@@ -471,7 +503,7 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
             inputDataReserva.value = '';
         });
 
-        inputDataReserva.addEventListener('change', function() {
+        inputDataReserva.addEventListener('change', function () {
             var idSala = inputIdSala.value;
             var dataReserva = inputDataReserva.value;
             if (!idSala || !dataReserva) {
@@ -488,7 +520,7 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
                         inputHoraInicio.innerHTML = '<option value="">Todos os horários reservados</option>';
                     } else {
                         inputHoraInicio.innerHTML = '<option value="">Selecione</option>';
-                        data.forEach(function(slot) {
+                        data.forEach(function (slot) {
                             var inicio = slot.split('-')[0];
                             inputHoraInicio.innerHTML += '<option value="' + inicio + '">' + slot + '</option>';
                         });
@@ -496,7 +528,7 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
                 });
         });
 
-        inputHoraInicio.addEventListener('change', function() {
+        inputHoraInicio.addEventListener('change', function () {
             var idSala = inputIdSala.value;
             var dataReserva = inputDataReserva.value;
             var horaInicio = inputHoraInicio.value;
@@ -509,7 +541,7 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
                 .then(data => {
                     inputHoraFim.innerHTML = '';
                     var found = false;
-                    data.forEach(function(slot, idx) {
+                    data.forEach(function (slot, idx) {
                         var inicio = slot.split('-')[0];
                         var fim = slot.split('-')[1];
                         if (inicio === horaInicio) found = true;
@@ -618,8 +650,9 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
 
 </html>
 <!-- Botão "+" fixo no canto inferior esquerdo -->
-<a href="adicionar_lab.php" 
-   style="position: fixed; left: 32px; bottom: 32px; z-index: 9999; background: #f7c948; color: #fff; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: flex-start; justify-content: center; font-size: 2.5rem; box-shadow: 0 4px 24px rgba(35,57,93,0.2); text-decoration: none; border: 1px solid #23395d;"
-   title="Adicionar Laboratório">
-    <span style="display: flex; align-items: flex-start; justify-content: center; width: 100%; height: 100%; font-size: 2.2rem; line-height: 1; margin-top: 7px;">+</span>
+<a href="adicionar_lab.php"
+    style="position: fixed; left: 32px; bottom: 32px; z-index: 9999; background: #f7c948; color: #fff; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: flex-start; justify-content: center; font-size: 2.5rem; box-shadow: 0 4px 24px rgba(35,57,93,0.2); text-decoration: none; border: 1px solid #23395d;"
+    title="Adicionar Laboratório">
+    <span
+        style="display: flex; align-items: flex-start; justify-content: center; width: 100%; height: 100%; font-size: 2.2rem; line-height: 1; margin-top: 7px;">+</span>
 </a>

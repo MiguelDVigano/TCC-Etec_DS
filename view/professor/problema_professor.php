@@ -13,7 +13,7 @@ if (!isset($_SESSION["id_usuario"]) || $_SESSION["tipo_usuario"] !== "Professor"
     exit();
 }
 
-require_once '../../conexao.php';
+require_once '../../controller/conexao.php';
 
 $sql = "SELECT id_sala, titulo_sala FROM sala order by titulo_sala";
 $result = $conn->query($sql);

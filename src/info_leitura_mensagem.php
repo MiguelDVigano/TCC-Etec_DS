@@ -20,7 +20,7 @@ if (!isset($_GET['id_mensagem']) || !is_numeric($_GET['id_mensagem'])) {
 
 $id_mensagem = intval($_GET['id_mensagem']);
 
-include '../conexao.php';
+include '../controller/conexao.php';
 
 // Descobrir se a mensagem é para todas as turmas
 $sql = "SELECT enviar_para_todas FROM mensagem WHERE id_mensagem = $id_mensagem";
