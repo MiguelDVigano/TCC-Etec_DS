@@ -47,8 +47,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         '9' => ['15:10:00', '16:00:00']
     ];
 
-    $hora_inicio = $PERIODOS_HORARIOS[$periodo_inicio][0];
-    $hora_fim = $PERIODOS_HORARIOS[$periodo_fim][1];
+    // IMPORTANTE: Usar os campos hidden enviados pelo formulário
+    // Se não vierem, calcular com base nos períodos
+    if (empty($data['hora_inicio']) || empty($data['hora_fim'])) {
+        $hora_inicio = $PERIODOS_HORARIOS[$periodo_inicio][0];
+        $hora_fim = $PERIODOS_HORARIOS[$periodo_fim][1];
+    } else {
+        $hora_inicio = $data['hora_inicio'];
+        $hora_fim = $data['hora_fim'];
+    }
 
     // =========================
     // 4. BLOQUEIO DE CONFLITO POR PERÍODO
@@ -103,19 +110,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     );
 
     if (!$stmt->execute()) {
-        echo "Erro ao reservar: " . $conn->error;
+        $error_message = "Erro ao reservar: " . $conn->error;
+        error_log($error_message);
+        header("Location: ../view/professor/laboratorios.php?erro_reserva=" . urlencode($error_message));
         exit;
     }
 
     // =========================
-    // 6. NÃO ATUALIZAR STATUS DA SALA PARA "OCUPADO" 
-    //    (deixar sempre "Ativa" e controlar por reservas)
-    // =========================
-    // Remover esta parte que muda o status para "Ocupado"
-
-    // =========================
-    // 7. RETORNO
+    // 6. RETORNO COM SUCESSO
     // =========================
     header("Location: ../view/professor/laboratorios.php?reserva=ok");
     exit;
 }
+?>

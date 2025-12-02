@@ -2,6 +2,8 @@
 // Adicione esta linha no início para garantir que só retorne JSON
 header('Content-Type: application/json; charset=utf-8');
 
+include 'conexao.php';
+
 // Verifique se há erros de conexão
 if (!isset($conn)) {
     echo json_encode(['ok' => false, 'erro' => 'Erro de conexão com o banco de dados']);

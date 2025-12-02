@@ -8,6 +8,10 @@ if (!isset($_SESSION["id_usuario"]) || $_SESSION["tipo_usuario"] !== "Professor"
 
 include '../../controller/conexao.php';
 
+// Obter informações do professor logado
+$id_professor_logado = $_SESSION['id_usuario'];
+$nome_professor_logado = $_SESSION['nome'] ?? ''; // Supondo que o nome esteja na sessão
+
 /* ===============================
    ✅ GRADE OFICIAL POR PERÍODO
 ================================ */
@@ -82,7 +86,34 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
 /* ===== LISTAGEM NORMAL ===== */
 $result = $conn->query("SELECT * FROM sala");
 $turmas = $conn->query("SELECT id_turma, nome_turma FROM turma");
-$professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuario WHERE tipo_usuario = 'Professor'");
+
+// Buscar dados do professor logado
+$sql_professor = "SELECT id_usuario, nome FROM usuario WHERE id_usuario = ?";
+$stmt_prof = $conn->prepare($sql_professor);
+$stmt_prof->bind_param("i", $id_professor_logado);
+$stmt_prof->execute();
+$result_prof = $stmt_prof->get_result();
+$professor_logado = $result_prof->fetch_assoc();
+
+// Se não encontrou, buscar todos os professores
+if (!$professor_logado) {
+    $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuario WHERE tipo_usuario = 'Professor'");
+} else {
+    // Criar um resultado simulado para manter compatibilidade
+    $professores = new stdClass();
+    $professores->data_seek = function () {};
+    $professores->fetch_assoc = function () use ($professor_logado) {
+        static $called = false;
+        if (!$called) {
+            $called = true;
+            return [
+                'id_professor' => $professor_logado['id_usuario'],
+                'nome' => $professor_logado['nome']
+            ];
+        }
+        return false;
+    };
+}
 ?>
 
 <!DOCTYPE html>
@@ -353,6 +384,8 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
                     <input type="hidden" name="id_sala" id="inputIdSala">
                     <input type="hidden" name="hora_inicio" id="hiddenHoraInicio" value="">
                     <input type="hidden" name="hora_fim" id="hiddenHoraFim" value="">
+                    <!-- Campo hidden para o professor -->
+                    <input type="hidden" name="id_professor" id="hiddenIdProfessor" value="<?= $id_professor_logado ?>">
 
                     <div class="mb-3">
                         <label for="inputTituloSala" class="form-label fw-semibold">Laboratório</label>
@@ -393,7 +426,7 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
                     <div class="row g-3 mb-3">
                         <div class="col-6">
                             <label for="inputTurma" class="form-label fw-semibold">Turma</label>
-                            <select class="form-select" name="id_turma" required>
+                            <select class="form-select" name="id_turma" id="inputTurma" required>
                                 <option value="">Selecione</option>
                                 <?php
                                 $turmas->data_seek(0);
@@ -405,21 +438,16 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
                         </div>
                         <div class="col-6">
                             <label for="inputProfessor" class="form-label fw-semibold">Professor</label>
-                            <select class="form-select" name="id_professor" required>
-                                <option value="">Selecione</option>
-                                <?php
-                                $professores->data_seek(0);
-                                while ($prof = $professores->fetch_assoc()): ?>
-                                    <option value="<?= $prof['id_professor'] ?>"><?= htmlspecialchars($prof['nome']) ?>
-                                    </option>
-                                <?php endwhile; ?>
-                            </select>
+                            <input type="text" class="form-control" id="inputProfessorDisplay"
+                                value="<?= htmlspecialchars($professor_logado['nome'] ?? '') ?>"
+                                readonly>
+                            <small class="text-muted">(preenchido automaticamente)</small>
                         </div>
                     </div>
 
                     <div class="mb-3">
                         <label for="inputObs" class="form-label fw-semibold">Observação</label>
-                        <textarea class="form-control" name="observacao" rows="3"
+                        <textarea class="form-control" name="observacao" id="inputObs" rows="3"
                             placeholder="Observações sobre a reserva..."></textarea>
                     </div>
                 </div>
