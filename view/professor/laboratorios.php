@@ -15,11 +15,11 @@ $PERIODOS_HORARIOS = [
     '1' => ['07:10:00', '08:00:00'],
     '2' => ['08:00:00', '08:50:00'],
     '3' => ['08:50:00', '09:40:00'],
-    // 09:40–10:00 intervalo
+    // intervalo 09:40 às 10:00 (sem aula)
     '4' => ['10:00:00', '10:50:00'],
     '5' => ['10:50:00', '11:40:00'],
     '6' => ['11:40:00', '12:30:00'],
-    // 12:30–13:30 almoço
+    // almoço 12:30 às 13:30
     '7' => ['13:30:00', '14:20:00'],
     '8' => ['14:20:00', '15:10:00'],
     '9' => ['15:10:00', '16:00:00'],
@@ -45,55 +45,16 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
 
     try {
 
-        /* ===== LABS DISPONÍVEIS POR PERÍODO ===== */
-        if ($action === 'disponiveis') {
-
-            if (!$data || !$horaInicio || !$horaFim) {
-                echo json_encode(['ok' => false, 'error' => 'Data e período obrigatórios']);
-                exit;
-            }
-
-            $sql = "
-                SELECT s.id_sala, s.titulo_sala
-                FROM sala s
-                WHERE s.status_sala = 'Ativa'
-                AND NOT EXISTS (
-                    SELECT 1
-                    FROM reserva r
-                    WHERE r.id_sala = s.id_sala
-                      AND r.data_reserva = ?
-                      AND NOT (
-                            r.hora_fim <= ?
-                         OR r.hora_inicio >= ?
-                      )
-                )
-                ORDER BY s.titulo_sala ASC
-            ";
-
-            $stmt = $conn->prepare($sql);
-            $stmt->bind_param("sss", $data, $horaInicio, $horaFim);
-            $stmt->execute();
-            $res = $stmt->get_result();
-
-            $rows = [];
-            while ($row = $res->fetch_assoc()) {
-                $rows[] = $row;
-            }
-
-            echo json_encode(['ok' => true, 'data' => $rows]);
-            exit;
-        }
-
         /* ===== MINHAS RESERVAS ===== */
         if ($action === 'minhas_reservas') {
 
             $sql = "
                 SELECT r.id_reserva, s.titulo_sala, r.data_reserva,
-                       r.hora_inicio, r.hora_fim
+                       r.hora_inicio, r.hora_fim, r.periodo_inicio, r.periodo_fim
                 FROM reserva r
                 INNER JOIN sala s ON s.id_sala = r.id_sala
                 WHERE r.id_professor = ?
-                ORDER BY r.data_reserva, r.hora_inicio
+                ORDER BY r.data_reserva, r.periodo_inicio
             ";
 
             $stmt = $conn->prepare($sql);
@@ -112,9 +73,8 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
 
         echo json_encode(['ok' => false, 'error' => 'Ação inválida']);
         exit;
-
     } catch (Throwable $e) {
-        echo json_encode(['ok' => false, 'error' => 'Erro interno']);
+        echo json_encode(['ok' => false, 'error' => 'Erro interno: ' . $e->getMessage()]);
         exit;
     }
 }
@@ -229,6 +189,14 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
 
         .hidden {
             display: none !important;
+        }
+
+        .badge-periodo {
+            background: #23395d;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
         }
     </style>
 </head>
@@ -383,6 +351,8 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
                 </div>
                 <div class="modal-body">
                     <input type="hidden" name="id_sala" id="inputIdSala">
+                    <input type="hidden" name="hora_inicio" id="hiddenHoraInicio" value="">
+                    <input type="hidden" name="hora_fim" id="hiddenHoraFim" value="">
 
                     <div class="mb-3">
                         <label for="inputTituloSala" class="form-label fw-semibold">Laboratório</label>
@@ -398,15 +368,24 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
 
                     <div class="row g-3 mb-3">
                         <div class="col-6">
-                            <label class="form-label fw-semibold">Horário de Início</label>
-                            <select class="form-select" name="hora_inicio" id="inputHoraInicio" required>
-                                <option value="">Selecione a data primeiro</option>
+                            <label class="form-label fw-semibold">Período Início</label>
+                            <select class="form-select" name="periodo_inicio" id="inputPeriodoInicio" required>
+                                <option value="">Selecione</option>
+                                <option value="1">1º período — 07:10 às 08:00</option>
+                                <option value="2">2º período — 08:00 às 08:50</option>
+                                <option value="3">3º período — 08:50 às 09:40</option>
+                                <option value="4">4º período — 10:00 às 10:50</option>
+                                <option value="5">5º período — 10:50 às 11:40</option>
+                                <option value="6">6º período — 11:40 às 12:30</option>
+                                <option value="7">7º período — 13:30 às 14:20</option>
+                                <option value="8">8º período — 14:20 às 15:10</option>
+                                <option value="9">9º período — 15:10 às 16:00</option>
                             </select>
                         </div>
                         <div class="col-6">
-                            <label class="form-label fw-semibold">Horário de Fim</label>
-                            <select class="form-select" name="hora_fim" id="inputHoraFim" required>
-                                <option value="">Selecione o início primeiro</option>
+                            <label class="form-label fw-semibold">Período Fim</label>
+                            <select class="form-select" name="periodo_fim" id="inputPeriodoFim" required>
+                                <option value="">Selecione início primeiro</option>
                             </select>
                         </div>
                     </div>
@@ -459,7 +438,7 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
     <!-- NOVO: Modal Minhas Reservas -->
     <div class="modal fade" id="modalMinhasReservas" tabindex="-1" aria-labelledby="modalMinhasReservasLabel"
         aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="modalMinhasReservasLabel">
@@ -468,9 +447,7 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
                 <div class="modal-body" id="minhas-reservas-body">
-                    <!-- NOVO texto padrão -->
-                    <div class="text-muted">Clique em "Minhas reservas" para ver todas as suas reservas. Use a data para
-                        filtrar, se desejar.</div>
+                    <div class="text-muted">Clique em "Minhas reservas" para ver todas as suas reservas.</div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
@@ -483,76 +460,76 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Definição dos períodos
+        const PERIODOS_HORARIOS = {
+            '1': ['07:10:00', '08:00:00'],
+            '2': ['08:00:00', '08:50:00'],
+            '3': ['08:50:00', '09:40:00'],
+            '4': ['10:00:00', '10:50:00'],
+            '5': ['10:50:00', '11:40:00'],
+            '6': ['11:40:00', '12:30:00'],
+            '7': ['13:30:00', '14:20:00'],
+            '8': ['14:20:00', '15:10:00'],
+            '9': ['15:10:00', '16:00:00']
+        };
+
+        // Variáveis do modal de reserva
         var modalReserva = document.getElementById('modalReserva');
         var inputIdSala = document.getElementById('inputIdSala');
         var inputTituloSala = document.getElementById('inputTituloSala');
-        var inputDataReserva = document.getElementById('inputDataReserva');
-        var inputHoraInicio = document.getElementById('inputHoraInicio');
-        var inputHoraFim = document.getElementById('inputHoraFim');
-        var reservaBtnStatus = null;
+        var inputPeriodoInicio = document.getElementById('inputPeriodoInicio');
+        var inputPeriodoFim = document.getElementById('inputPeriodoFim');
+        var hiddenHoraInicio = document.getElementById('hiddenHoraInicio');
+        var hiddenHoraFim = document.getElementById('hiddenHoraFim');
 
-        modalReserva.addEventListener('show.bs.modal', function (event) {
+        // Configuração do modal de reserva
+        modalReserva.addEventListener('show.bs.modal', function(event) {
             var button = event.relatedTarget;
             var idSala = button.getAttribute('data-id');
             var tituloSala = button.getAttribute('data-titulo');
-            reservaBtnStatus = button.getAttribute('data-status');
             inputIdSala.value = idSala;
             inputTituloSala.value = tituloSala;
-            inputHoraInicio.innerHTML = '<option value="">Selecione a data primeiro</option>';
-            inputHoraFim.innerHTML = '<option value="">Selecione o início primeiro</option>';
-            inputDataReserva.value = '';
+
+            // Limpar selects de período
+            inputPeriodoInicio.value = '';
+            inputPeriodoFim.innerHTML = '<option value="">Selecione início primeiro</option>';
+            hiddenHoraInicio.value = '';
+            hiddenHoraFim.value = '';
+
+            // Limpar data
+            document.getElementById('inputDataReserva').value = '';
         });
 
-        inputDataReserva.addEventListener('change', function () {
-            var idSala = inputIdSala.value;
-            var dataReserva = inputDataReserva.value;
-            if (!idSala || !dataReserva) {
-                inputHoraInicio.innerHTML = '<option value="">Selecione a data primeiro</option>';
-                inputHoraFim.innerHTML = '<option value="">Selecione o início primeiro</option>';
-                return;
+        // Atualizar o select de período fim quando selecionar período início
+        inputPeriodoInicio.addEventListener('change', function() {
+            const inicio = parseInt(this.value);
+            const fimSelect = document.getElementById('inputPeriodoFim');
+
+            fimSelect.innerHTML = '<option value="">Selecione</option>';
+            hiddenHoraFim.value = '';
+
+            if (inicio >= 1 && inicio <= 9) {
+                // Preencher opções do período fim (do início até o 9)
+                for (let i = inicio; i <= 9; i++) {
+                    const [horaIni, horaFim] = PERIODOS_HORARIOS[i];
+                    fimSelect.innerHTML += `<option value="${i}">${i}º período — ${horaIni.slice(0,5)} às ${horaFim.slice(0,5)}</option>`;
+                }
+
+                // Setar o horário inicial
+                hiddenHoraInicio.value = PERIODOS_HORARIOS[inicio][0];
             }
-            fetch('../../src/reservar_laboratorio_horarios.php?id_sala=' + idSala + '&data_reserva=' + dataReserva)
-                .then(response => response.json())
-                .then(data => {
-                    inputHoraInicio.innerHTML = '';
-                    inputHoraFim.innerHTML = '<option value="">Selecione o início primeiro</option>';
-                    if (data.length === 0) {
-                        inputHoraInicio.innerHTML = '<option value="">Todos os horários reservados</option>';
-                    } else {
-                        inputHoraInicio.innerHTML = '<option value="">Selecione</option>';
-                        data.forEach(function (slot) {
-                            var inicio = slot.split('-')[0];
-                            inputHoraInicio.innerHTML += '<option value="' + inicio + '">' + slot + '</option>';
-                        });
-                    }
-                });
         });
 
-        inputHoraInicio.addEventListener('change', function () {
-            var idSala = inputIdSala.value;
-            var dataReserva = inputDataReserva.value;
-            var horaInicio = inputHoraInicio.value;
-            if (!idSala || !dataReserva || !horaInicio) {
-                inputHoraFim.innerHTML = '<option value="">Selecione o início primeiro</option>';
-                return;
+        // Atualizar horário fim quando selecionar período fim
+        inputPeriodoFim.addEventListener('change', function() {
+            const fim = parseInt(this.value);
+
+            if (fim >= 1 && fim <= 9) {
+                hiddenHoraFim.value = PERIODOS_HORARIOS[fim][1];
             }
-            fetch('../../src/reservar_laboratorio_horarios.php?id_sala=' + idSala + '&data_reserva=' + dataReserva)
-                .then(response => response.json())
-                .then(data => {
-                    inputHoraFim.innerHTML = '';
-                    var found = false;
-                    data.forEach(function (slot, idx) {
-                        var inicio = slot.split('-')[0];
-                        var fim = slot.split('-')[1];
-                        if (inicio === horaInicio) found = true;
-                        if (found) {
-                            inputHoraFim.innerHTML += '<option value="' + fim + '">' + slot + '</option>';
-                        }
-                    });
-                });
         });
 
-        // NOVO: Lógica do pré-filtro
+        // Lógica do pré-filtro
         const pfData = document.getElementById('pf-data');
         const pfPeriodo = document.getElementById('pf-periodo');
         const pfVerDisp = document.getElementById('pf-ver-disponiveis');
@@ -562,89 +539,207 @@ $professores = $conn->query("SELECT id_usuario AS id_professor, nome FROM usuari
         const gridLabs = document.getElementById('grid-labs');
 
         function resetFiltro() {
-            // Oculta a grid e limpa mensagens/filtros
             gridLabs.classList.add('hidden');
             pfResultado.textContent = '';
             pfData.value = '';
             pfPeriodo.value = '';
-            // Prepara todos os cards para próximo filtro
             document.querySelectorAll('.lab-card').forEach(card => card.classList.remove('hidden'));
         }
 
         pfLimpar.addEventListener('click', resetFiltro);
 
+        // Ver laboratórios disponíveis
         pfVerDisp.addEventListener('click', async () => {
             const data = pfData.value;
             const periodo = pfPeriodo.value;
+
             if (!data || !periodo) {
                 pfResultado.textContent = 'Informe data e período.';
                 gridLabs.classList.add('hidden');
                 return;
             }
+
             pfResultado.textContent = 'Carregando laboratórios disponíveis...';
+
             try {
-                const qs = new URLSearchParams({ ajax: '1', action: 'disponiveis', data, periodo });
-                const res = await fetch(`./laboratorios.php?${qs.toString()}`, { headers: { 'Accept': 'application/json' } });
-                const json = await res.json();
-                if (!json.ok) throw new Error(json.error || 'Falha ao consultar');
-                const idsDisponiveis = new Set(json.data.map(i => String(i.id_sala)));
-                let visiveis = 0;
-                document.querySelectorAll('.lab-card').forEach(card => {
-                    const idSala = card.getAttribute('data-id-sala');
-                    if (idsDisponiveis.has(idSala)) {
-                        card.classList.remove('hidden');
-                        visiveis++;
-                    } else {
-                        card.classList.add('hidden');
-                    }
+                // Enviar requisição para buscar disponíveis
+                const formData = new FormData();
+                formData.append('action', 'disponiveis');
+                formData.append('data', data);
+                formData.append('periodo_inicio', periodo);
+                formData.append('periodo_fim', periodo);
+
+                console.log('Enviando requisição para buscar disponíveis...');
+                console.log('Data:', data, 'Período:', periodo);
+
+                const res = await fetch('../../controller/buscar_laboratorios_disponiveis.php', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json'
+                    },
+                    body: formData
                 });
-                if (visiveis > 0) {
-                    gridLabs.classList.remove('hidden');
-                    pfResultado.textContent = `${visiveis} laboratório(s) disponível(is) no período selecionado.`;
-                } else {
+
+                // Primeiro, verifique se a resposta é JSON
+                const responseText = await res.text();
+                console.log('Resposta do servidor:', responseText.substring(0, 200)); // Mostra os primeiros 200 caracteres
+
+                try {
+                    const json = JSON.parse(responseText);
+
+                    if (!json.ok) {
+                        throw new Error(json.erro || 'Falha ao consultar');
+                    }
+
+                    const idsDisponiveis = new Set(json.data.map(i => String(i.id_sala)));
+                    let visiveis = 0;
+
+                    document.querySelectorAll('.lab-card').forEach(card => {
+                        const idSala = card.getAttribute('data-id-sala');
+                        if (idsDisponiveis.has(idSala)) {
+                            card.classList.remove('hidden');
+                            visiveis++;
+                        } else {
+                            card.classList.add('hidden');
+                        }
+                    });
+
+                    if (visiveis > 0) {
+                        gridLabs.classList.remove('hidden');
+                        pfResultado.textContent = `${visiveis} laboratório(s) disponível(is) no período selecionado.`;
+                    } else {
+                        gridLabs.classList.add('hidden');
+                        pfResultado.textContent = 'Nenhum laboratório disponível no período selecionado.';
+                    }
+                } catch (parseError) {
+                    console.error('Erro ao parsear JSON:', parseError);
                     gridLabs.classList.add('hidden');
-                    pfResultado.textContent = 'Nenhum laboratório disponível no período selecionado.';
+                    pfResultado.textContent = 'Erro: Resposta inválida do servidor. Verifique o console.';
                 }
             } catch (e) {
+                console.error('Erro na requisição:', e);
                 gridLabs.classList.add('hidden');
-                pfResultado.textContent = 'Erro ao carregar disponíveis.';
+                pfResultado.textContent = 'Erro ao carregar disponíveis: ' + e.message;
             }
         });
 
+        // Minhas reservas
         pfMinhasReservas.addEventListener('click', async () => {
-            // NOVO: data não é obrigatória; se informada, apenas filtra
             const data = pfData.value;
-            const periodo = pfPeriodo.value;
             pfResultado.textContent = 'Carregando suas reservas...';
-            const qs = new URLSearchParams({ ajax: '1', action: 'minhas_reservas' });
+
+            const qs = new URLSearchParams({
+                ajax: '1',
+                action: 'minhas_reservas'
+            });
+
             if (data) qs.append('data', data);
-            if (data && periodo) qs.append('periodo', periodo); // período só se tiver data
+
             try {
-                const res = await fetch(`./laboratorios.php?${qs.toString()}`, { headers: { 'Accept': 'application/json' } });
+                const res = await fetch(`laboratorios.php?${qs.toString()}`, {
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
                 const json = await res.json();
                 const body = document.getElementById('minhas-reservas-body');
+
                 if (!json.ok) {
-                    body.innerHTML = `<div class="text-danger">${json.error || 'Falha ao consultar'}</div>`;
+                    body.innerHTML = `<div class="alert alert-danger">${json.error || 'Falha ao consultar'}</div>`;
                 } else if (!json.data || json.data.length === 0) {
-                    body.innerHTML = '<div class="text-muted">Nenhuma reserva encontrada.</div>';
+                    body.innerHTML = '<div class="alert alert-info">Nenhuma reserva encontrada.</div>';
                 } else {
-                    const items = json.data.map(r =>
-                        `<li class="list-group-item">
-                            <div><strong>${r.titulo_sala || 'Laboratório'}</strong></div>
-                            <small class="text-muted">${r.data_reserva} — ${r.hora_inicio} às ${r.hora_fim}</small>
-                         </li>`
-                    ).join('');
-                    body.innerHTML = `<ul class="list-group">${items}</ul>`;
+                    let tableHtml = `
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Laboratório</th>
+                                        <th>Data</th>
+                                        <th>Período</th>
+                                        <th>Horário</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                    `;
+
+                    json.data.forEach(reserva => {
+                        const periodoText = reserva.periodo_inicio === reserva.periodo_fim ?
+                            `${reserva.periodo_inicio}º` :
+                            `${reserva.periodo_inicio}º ao ${reserva.periodo_fim}º`;
+
+                        tableHtml += `
+                            <tr>
+                                <td><strong>${reserva.titulo_sala}</strong></td>
+                                <td>${reserva.data_reserva}</td>
+                                <td><span class="badge-periodo">${periodoText}</span></td>
+                                <td>${reserva.hora_inicio.slice(0,5)} às ${reserva.hora_fim.slice(0,5)}</td>
+                            </tr>
+                        `;
+                    });
+
+                    tableHtml += `
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+
+                    body.innerHTML = tableHtml;
                 }
+
                 new bootstrap.Modal(document.getElementById('modalMinhasReservas')).show();
                 pfResultado.textContent = '';
             } catch (e) {
-                pfResultado.textContent = 'Erro ao carregar suas reservas.';
+                pfResultado.textContent = 'Erro ao carregar suas reservas: ' + e.message;
             }
         });
 
         // Inicial: garantir grid oculta
         gridLabs.classList.add('hidden');
+
+        // Configurar data mínima como hoje
+        const today = new Date().toISOString().split('T')[0];
+        pfData.min = today;
+        document.getElementById('inputDataReserva').min = today;
+
+        // Função de debug para testar a conexão
+        async function testarConexao() {
+            console.log('=== Testando conexão com buscar_laboratorios_disponiveis.php ===');
+
+            const formData = new FormData();
+            formData.append('action', 'disponiveis');
+            formData.append('data', '2024-12-15');
+            formData.append('periodo_inicio', '1');
+            formData.append('periodo_fim', '1');
+
+            try {
+                const res = await fetch('../../src/buscar_laboratorios_disponiveis.php', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json'
+                    },
+                    body: formData
+                });
+
+                const text = await res.text();
+                console.log('Status:', res.status);
+                console.log('Headers:', res.headers.get('content-type'));
+                console.log('Resposta:', text.substring(0, 500));
+
+                try {
+                    const json = JSON.parse(text);
+                    console.log('JSON parseado:', json);
+                } catch (e) {
+                    console.log('Não é JSON válido');
+                }
+            } catch (error) {
+                console.error('Erro na requisição:', error);
+            }
+        }
+
+        // Para testar, você pode chamar esta função no console do navegador:
+        // testarConexao();
     </script>
 </body>
 

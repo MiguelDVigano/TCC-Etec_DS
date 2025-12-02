@@ -1,5 +1,12 @@
 <?php
-include '../controller/conexao.php';
+// Adicione esta linha no início para garantir que só retorne JSON
+header('Content-Type: application/json; charset=utf-8');
+
+// Verifique se há erros de conexão
+if (!isset($conn)) {
+    echo json_encode(['ok' => false, 'erro' => 'Erro de conexão com o banco de dados']);
+    exit;
+}
 
 $action = $_POST['action'] ?? null;
 $data   = $_POST['data'] ?? null;
@@ -7,24 +14,19 @@ $periodo_inicio = $_POST['periodo_inicio'] ?? null;
 $periodo_fim    = $_POST['periodo_fim'] ?? null;
 
 /* ================================
-   GRADE OFICIAL DE HORÁRIOS
-   (TEM QUE SER IGUAL AO SISTEMA)
+   DEFINIÇÃO DOS PERÍODOS
+   1-9 conforme grade oficial
 ================================ */
-$PERIODOS_HORARIOS = [
-    '1'  => ['07:10:00','08:00:00'],
-    '2'  => ['08:00:00','08:50:00'],
-    '3'  => ['08:50:00','09:40:00'],
-    '4'  => ['10:00:00','10:50:00'],
-    '5'  => ['10:50:00','11:40:00'],
-    '6'  => ['11:40:00','12:30:00'],
-    '7'  => ['13:30:00','14:20:00'],
-    '8'  => ['14:20:00','15:10:00'],
-    '9'  => ['15:10:00','16:00:00'],
-    '10' => ['19:00:00','19:50:00'],
-    '11' => ['19:50:00','20:40:00'],
-    '12' => ['20:40:00','21:30:00'],
-    '13' => ['21:30:00','22:20:00'],
-    '14' => ['22:20:00','23:10:00']
+$PERIODOS = [
+    '1' => '07:10-08:00',
+    '2' => '08:00-08:50',
+    '3' => '08:50-09:40',
+    '4' => '10:00-10:50',
+    '5' => '10:50-11:40',
+    '6' => '11:40-12:30',
+    '7' => '13:30-14:20',
+    '8' => '14:20-15:10',
+    '9' => '15:10-16:00'
 ];
 
 if ($action !== 'disponiveis') {
@@ -34,18 +36,17 @@ if ($action !== 'disponiveis') {
 
 if (
     empty($data) ||
-    !isset($PERIODOS_HORARIOS[$periodo_inicio]) ||
-    !isset($PERIODOS_HORARIOS[$periodo_fim])
+    !isset($PERIODOS[$periodo_inicio]) ||
+    !isset($PERIODOS[$periodo_fim]) ||
+    $periodo_inicio > $periodo_fim
 ) {
-    echo json_encode(['ok' => false, 'erro' => 'Parâmetros inválidos']);
+    echo json_encode(['ok' => false, 'erro' => 'Parâmetros inválidos. Data: ' . ($data ?? 'vazio') . ', Início: ' . ($periodo_inicio ?? 'vazio') . ', Fim: ' . ($periodo_fim ?? 'vazio')]);
     exit;
 }
 
-$horaInicio = $PERIODOS_HORARIOS[$periodo_inicio][0];
-$horaFim    = $PERIODOS_HORARIOS[$periodo_fim][1];
-
 /* ================================
    QUERY QUE BLOQUEIA CONFLITOS
+   Verifica se existe reserva que sobrepõe os períodos
 ================================ */
 $sql = "
     SELECT s.id_sala, s.titulo_sala
@@ -57,25 +58,37 @@ $sql = "
         WHERE r.id_sala = s.id_sala
           AND r.data_reserva = ?
           AND NOT (
-                r.hora_fim <= ?
-             OR r.hora_inicio >= ?
+                r.periodo_fim < ?  -- Reserva termina antes do período desejado
+             OR r.periodo_inicio > ? -- Reserva começa depois do período desejado
           )
     )
     ORDER BY s.titulo_sala
 ";
 
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("sss", $data, $horaInicio, $horaFim);
-$stmt->execute();
-$result = $stmt->get_result();
+try {
+    $stmt = $conn->prepare($sql);
+    if (!$stmt) {
+        echo json_encode(['ok' => false, 'erro' => 'Erro ao preparar consulta: ' . $conn->error]);
+        exit;
+    }
+    
+    $stmt->bind_param("sii", $data, $periodo_inicio, $periodo_fim);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-$labs = [];
-while ($row = $result->fetch_assoc()) {
-    $labs[] = $row;
+    $labs = [];
+    while ($row = $result->fetch_assoc()) {
+        $labs[] = $row;
+    }
+
+    echo json_encode([
+        'ok' => true,
+        'data' => $labs,
+        'total' => count($labs)
+    ]);
+    
+} catch (Exception $e) {
+    echo json_encode(['ok' => false, 'erro' => 'Erro no banco de dados: ' . $e->getMessage()]);
 }
-
-echo json_encode([
-    'ok' => true,
-    'data' => $labs
-]);
 exit;
+?>

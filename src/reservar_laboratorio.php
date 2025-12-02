@@ -9,8 +9,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // =========================
     if (
         empty($data['data_reserva']) ||
-        empty($data['hora_inicio']) ||
-        empty($data['hora_fim']) ||
+        empty($data['periodo_inicio']) ||
+        empty($data['periodo_fim']) ||
         empty($data['id_professor']) ||
         empty($data['id_sala']) ||
         empty($data['id_turma'])
@@ -20,46 +20,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // =========================
-    // 2. TABELA DE HORÁRIOS
+    // 2. VALIDAR PERÍODOS (1-9)
     // =========================
-    $timeSlots = [
-        "07:10-08:00",
-        "08:00-08:50",
-        "08:50-09:40",
-        "10:00-10:50",
-        "10:50-11:40",
-        "11:40-12:30",
-        "13:30-14:20",
-        "14:20-15:10",
-        "15:10-16:00",
-        "19:00-19:50",
-        "19:50-20:40",
-        "20:40-21:30",
-        "21:30-22:20",
-        "22:20-23:10"
-    ];
+    $periodo_inicio = (int)$data['periodo_inicio'];
+    $periodo_fim = (int)$data['periodo_fim'];
 
-    // =========================
-    // 3. VALIDAR INTERVALO
-    // =========================
-    $idx_inicio = array_search($data['hora_inicio'] . '-' . substr($data['hora_fim'], 0, 5), $timeSlots);
-
-    $idx_inicio = -1;
-    $idx_fim = -1;
-
-    foreach ($timeSlots as $i => $slot) {
-        [$inicio, $fim] = explode('-', $slot);
-        if ($inicio == $data['hora_inicio']) $idx_inicio = $i;
-        if ($fim == $data['hora_fim']) $idx_fim = $i;
-    }
-
-    if ($idx_inicio === -1 || $idx_fim === -1 || $idx_inicio > $idx_fim) {
-        header("Location: ../view/professor/laboratorios.php?erro_reserva=" . urlencode("Horário inválido."));
+    if ($periodo_inicio < 1 || $periodo_inicio > 9 || 
+        $periodo_fim < 1 || $periodo_fim > 9 || 
+        $periodo_inicio > $periodo_fim) {
+        header("Location: ../view/professor/laboratorios.php?erro_reserva=" . urlencode("Períodos inválidos."));
         exit;
     }
 
     // =========================
-    // 4. BLOQUEIO ABSOLUTO DE CONFLITO
+    // 3. TABELA DE CONVERSÃO PERÍODO -> HORÁRIO
+    // =========================
+    $PERIODOS_HORARIOS = [
+        '1' => ['07:10:00', '08:00:00'],
+        '2' => ['08:00:00', '08:50:00'],
+        '3' => ['08:50:00', '09:40:00'],
+        '4' => ['10:00:00', '10:50:00'],
+        '5' => ['10:50:00', '11:40:00'],
+        '6' => ['11:40:00', '12:30:00'],
+        '7' => ['13:30:00', '14:20:00'],
+        '8' => ['14:20:00', '15:10:00'],
+        '9' => ['15:10:00', '16:00:00']
+    ];
+
+    $hora_inicio = $PERIODOS_HORARIOS[$periodo_inicio][0];
+    $hora_fim = $PERIODOS_HORARIOS[$periodo_fim][1];
+
+    // =========================
+    // 4. BLOQUEIO DE CONFLITO POR PERÍODO
     // =========================
     $stmt = $conn->prepare("
         SELECT COUNT(*) AS total
@@ -67,16 +59,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         WHERE id_sala = ?
           AND data_reserva = ?
           AND NOT (
-              hora_fim <= ? OR hora_inicio >= ?
+              periodo_fim < ? OR periodo_inicio > ?
           )
     ");
 
     $stmt->bind_param(
-        "isss",
+        "isii",
         $data['id_sala'],
         $data['data_reserva'],
-        $data['hora_inicio'],
-        $data['hora_fim']
+        $periodo_inicio,
+        $periodo_fim
     );
 
     $stmt->execute();
@@ -84,24 +76,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $conflict = $result->fetch_assoc()['total'] > 0;
 
     if ($conflict) {
-        header("Location: ../view/professor/laboratorios.php?erro_reserva=" . urlencode("Erro: Este laboratório já está reservado nesse horário."));
+        header("Location: ../view/professor/laboratorios.php?erro_reserva=" . urlencode("Erro: Este laboratório já está reservado nesse período."));
         exit;
     }
 
     // =========================
-    // 5. INSERIR RESERVA
+    // 5. INSERIR RESERVA COM PERÍODOS
     // =========================
     $stmt = $conn->prepare("
         INSERT INTO reserva
-        (data_reserva, hora_inicio, hora_fim, id_professor, id_sala, id_turma, observacao)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        (data_reserva, periodo_inicio, periodo_fim, hora_inicio, hora_fim, id_professor, id_sala, id_turma, observacao)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
 
     $stmt->bind_param(
-        "sssiiis",
+        "siissiiis",
         $data['data_reserva'],
-        $data['hora_inicio'],
-        $data['hora_fim'],
+        $periodo_inicio,
+        $periodo_fim,
+        $hora_inicio,
+        $hora_fim,
         $data['id_professor'],
         $data['id_sala'],
         $data['id_turma'],
@@ -114,26 +108,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // =========================
-    // 6. ATUALIZAR STATUS DA SALA POR PERÍODO
+    // 6. NÃO ATUALIZAR STATUS DA SALA PARA "OCUPADO" 
+    //    (deixar sempre "Ativa" e controlar por reservas)
     // =========================
-    $stmt = $conn->prepare("
-        SELECT COUNT(*) AS total
-        FROM reserva
-        WHERE id_sala = ?
-          AND data_reserva = ?
-    ");
-    $stmt->bind_param("is", $data['id_sala'], $data['data_reserva']);
-    $stmt->execute();
-    $totalReservas = $stmt->get_result()->fetch_assoc()['total'];
-
-    if ($totalReservas > 0) {
-        $stmt = $conn->prepare("UPDATE sala SET status_sala = 'Ocupado' WHERE id_sala = ?");
-    } else {
-        $stmt = $conn->prepare("UPDATE sala SET status_sala = 'Ativa' WHERE id_sala = ?");
-    }
-
-    $stmt->bind_param("i", $data['id_sala']);
-    $stmt->execute();
+    // Remover esta parte que muda o status para "Ocupado"
 
     // =========================
     // 7. RETORNO
@@ -141,4 +119,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     header("Location: ../view/professor/laboratorios.php?reserva=ok");
     exit;
 }
-?>
