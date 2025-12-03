@@ -2,7 +2,7 @@
 session_start();
 
 if (!isset($_SESSION["id_usuario"]) || $_SESSION["tipo_usuario"] !== "Professor") {
-    header("Location: ../Login.html");
+    header("Location: ../../src/logout.php");
     exit();
 }
 
@@ -382,6 +382,10 @@ if (!$professor_logado) {
                 </div>
                 <div class="modal-body">
                     <input type="hidden" name="id_sala" id="inputIdSala">
+                    <!-- Campos para armazenar os valores do filtro -->
+                    <input type="hidden" id="filtroData" value="">
+                    <input type="hidden" id="filtroPeriodo" value="">
+
                     <input type="hidden" name="hora_inicio" id="hiddenHoraInicio" value="">
                     <input type="hidden" name="hora_fim" id="hiddenHoraFim" value="">
                     <!-- Campo hidden para o professor -->
@@ -518,14 +522,43 @@ if (!$professor_logado) {
             inputIdSala.value = idSala;
             inputTituloSala.value = tituloSala;
 
-            // Limpar selects de período
-            inputPeriodoInicio.value = '';
-            inputPeriodoFim.innerHTML = '<option value="">Selecione início primeiro</option>';
-            hiddenHoraInicio.value = '';
-            hiddenHoraFim.value = '';
+            // Obter valores do filtro
+            const filtroData = pfData.value;
+            const filtroPeriodo = pfPeriodo.value;
 
-            // Limpar data
-            document.getElementById('inputDataReserva').value = '';
+            // Preencher automaticamente com os valores do filtro
+            if (filtroData) {
+                document.getElementById('inputDataReserva').value = filtroData;
+            }
+
+            // Preencher período início se houver filtro
+            if (filtroPeriodo) {
+                inputPeriodoInicio.value = filtroPeriodo;
+
+                // Disparar o evento change para preencher as opções de período fim
+                const changeEvent = new Event('change');
+                inputPeriodoInicio.dispatchEvent(changeEvent);
+
+                // Selecionar o mesmo período no fim (ou o próximo)
+                inputPeriodoFim.value = filtroPeriodo;
+
+                // Preencher os horários
+                if (filtroPeriodo >= 1 && filtroPeriodo <= 9) {
+                    hiddenHoraInicio.value = PERIODOS_HORARIOS[filtroPeriodo][0];
+                    hiddenHoraFim.value = PERIODOS_HORARIOS[filtroPeriodo][1];
+                }
+            } else {
+                // Se não houver filtro, limpar os campos
+                inputPeriodoInicio.value = '';
+                inputPeriodoFim.innerHTML = '<option value="">Selecione início primeiro</option>';
+                hiddenHoraInicio.value = '';
+                hiddenHoraFim.value = '';
+
+                // Limpar data se não houver filtro
+                if (!filtroData) {
+                    document.getElementById('inputDataReserva').value = '';
+                }
+            }
         });
 
         // Atualizar o select de período fim quando selecionar período início
@@ -554,6 +587,8 @@ if (!$professor_logado) {
 
             if (fim >= 1 && fim <= 9) {
                 hiddenHoraFim.value = PERIODOS_HORARIOS[fim][1];
+            } else {
+                hiddenHoraFim.value = '';
             }
         });
 
@@ -565,6 +600,15 @@ if (!$professor_logado) {
         const pfLimpar = document.getElementById('pf-limpar');
         const pfResultado = document.getElementById('pf-resultado');
         const gridLabs = document.getElementById('grid-labs');
+
+        // Armazenar valores do filtro quando forem alterados
+        pfData.addEventListener('change', function() {
+            document.getElementById('filtroData').value = this.value;
+        });
+
+        pfPeriodo.addEventListener('change', function() {
+            document.getElementById('filtroPeriodo').value = this.value;
+        });
 
         function resetFiltro() {
             gridLabs.classList.add('hidden');
@@ -687,6 +731,7 @@ if (!$professor_logado) {
                                         <th>Data</th>
                                         <th>Período</th>
                                         <th>Horário</th>
+                                        <th>Ações</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -697,12 +742,36 @@ if (!$professor_logado) {
                             `${reserva.periodo_inicio}º` :
                             `${reserva.periodo_inicio}º ao ${reserva.periodo_fim}º`;
 
+                        // Formatar data para DD/MM/YYYY
+                        let dataFormatada = reserva.data_reserva;
+                        if (dataFormatada && /^\d{4}-\d{2}-\d{2}$/.test(dataFormatada)) {
+                            const [ano, mes, dia] = dataFormatada.split('-');
+                            dataFormatada = `${dia}/${mes}/${ano}`;
+                        }
+
+                        // Verifica se a reserva é futura ou de hoje
+                        const hoje = new Date().toISOString().split('T')[0];
+                        let podeCancelar = false;
+                        if (reserva.data_reserva >= hoje) {
+                            podeCancelar = true;
+                        }
+
                         tableHtml += `
                             <tr>
                                 <td><strong>${reserva.titulo_sala}</strong></td>
-                                <td>${reserva.data_reserva}</td>
+                                <td>${dataFormatada}</td>
                                 <td><span class="badge-periodo">${periodoText}</span></td>
                                 <td>${reserva.hora_inicio.slice(0,5)} às ${reserva.hora_fim.slice(0,5)}</td>
+                                <td>
+                                    ${podeCancelar ? `
+                                    <form method="POST" action="../../src/cancelar_reservas.php" style="display:inline;">
+                                        <input type="hidden" name="id_reserva" value="${reserva.id_reserva}">
+                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Tem certeza que deseja cancelar esta reserva?');">
+                                            <i class="bi bi-x-circle"></i> Cancelar
+                                        </button>
+                                    </form>
+                                    ` : ''}
+                                </td>
                             </tr>
                         `;
                     });
@@ -772,10 +841,3 @@ if (!$professor_logado) {
 </body>
 
 </html>
-<!-- Botão "+" fixo no canto inferior esquerdo -->
-<a href="adicionar_lab.php"
-    style="position: fixed; left: 32px; bottom: 32px; z-index: 9999; background: #f7c948; color: #fff; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: flex-start; justify-content: center; font-size: 2.5rem; box-shadow: 0 4px 24px rgba(35,57,93,0.2); text-decoration: none; border: 1px solid #23395d;"
-    title="Adicionar Laboratório">
-    <span
-        style="display: flex; align-items: flex-start; justify-content: center; width: 100%; height: 100%; font-size: 2.2rem; line-height: 1; margin-top: 7px;">+</span>
-</a>

@@ -20,17 +20,26 @@ function buscarMensagensEnviadas($conn, $id_remetente, $filtro_assunto, $filtro_
         $where .= " AND DATE(m.data_envio) = '" . $conn->real_escape_string($filtro_data) . "'";
     }
 
+    // CONSULTA CORRIGIDA: usar LEFT JOIN e GROUP_CONCAT com a relação correta
     $sql_mensagens_enviadas = "
         SELECT m.id_mensagem, m.assunto, m.mensagem, m.data_envio,
-            (SELECT GROUP_CONCAT(t.nome_turma SEPARATOR ', ')
-                FROM mensagem_turma mt
-                JOIN turma t ON mt.id_mensagem = m.id_mensagem
-                WHERE mt.id_mensagem = m.id_mensagem) AS turmas_destinatarias,
-            m.enviar_para_todas
+               m.enviar_para_todas,
+               CASE 
+                   WHEN m.enviar_para_todas = 1 THEN 'Todas as turmas'
+                   ELSE COALESCE(
+                       (SELECT GROUP_CONCAT(t.nome_turma SEPARATOR ', ')
+                        FROM mensagem_turma mt
+                        JOIN turma t ON mt.id_turma = t.id_turma
+                        WHERE mt.id_mensagem = m.id_mensagem), 
+                       '—'
+                   )
+               END AS turmas_destinatarias
         FROM mensagem m
         WHERE $where
+        GROUP BY m.id_mensagem
         ORDER BY m.data_envio DESC
     ";
+    
     return $conn->query($sql_mensagens_enviadas);
 }
 

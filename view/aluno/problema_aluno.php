@@ -9,7 +9,7 @@ session_set_cookie_params([
 ]);
 session_start();
 if (!isset($_SESSION["id_usuario"]) || $_SESSION["tipo_usuario"] !== "Aluno") {
-    header("Location: ../Login.html");
+    header("Location: ../../src/logout.php");
     exit();
 }
 

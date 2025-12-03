@@ -9,7 +9,7 @@ session_set_cookie_params([
 ]);
 session_start();
 if (!isset($_SESSION["id_usuario"]) || $_SESSION["tipo_usuario"] !== "Manutencao") {
-    header("Location: ../Login.html");
+    header("Location: ../../src/logout.php");
     exit();
 }
 
@@ -282,3 +282,24 @@ if ($result) {
 <?php
 $conn->close();
 ?>
+<!-- Botões "+" fixos no canto inferior esquerdo, alinhados lado a lado, com texto explicativo -->
+<div style="position: fixed; left: 32px; bottom: 32px; z-index: 9999;">
+    <div style="display: flex; gap: 18px;">
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <a href="adicionar_lab.php"
+                style="background: #f7c948; color: #fff; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; box-shadow: 0 4px 24px rgba(35,57,93,0.2); text-decoration: none; border: 1px solid #23395d;"
+                title="Adicionar Laboratório">
+                <span style="font-size: 2.2rem; line-height: 1;">+</span>
+            </a>
+            <span style="margin-top: 6px; font-size: 0.95rem; color: #ffffff; font-weight: 600; text-align: center;">Novo Laboratório</span>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <a href="adicionar_aluno.php"
+                style="background: #4f6d7a; color: #fff; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; box-shadow: 0 4px 24px rgba(35,57,93,0.2); text-decoration: none; border: 1px solid #23395d;"
+                title="Adicionar Aluno">
+                <span style="font-size: 2.2rem; line-height: 1;">+</span>
+            </a>
+            <span style="margin-top: 6px; font-size: 0.95rem; color: #ffffff; font-weight: 600; text-align: center;">Novo Aluno</span>
+        </div>
+    </div>
+</div>
