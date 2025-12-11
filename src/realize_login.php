@@ -14,26 +14,33 @@ $email = $_POST['email'];
 $senha = $_POST['senha'];
 $tipoUsuario = $_POST['tipoUsuario'];
 
-// Buscar usuário por email e tipo
-$sql = "SELECT * FROM usuario WHERE email = '$email' AND senha_hash = '$senha' AND tipo_usuario = '$tipoUsuario'";
-$result = $conn->query($sql);
+// Buscar usuário por email e tipo (NÃO compare senha aqui!)
+$sql = "SELECT * FROM usuario WHERE email = ? AND tipo_usuario = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("ss", $email, $tipoUsuario);
+$stmt->execute();
+$result = $stmt->get_result();
 
 if ($result && $result->num_rows > 0) {
-    session_start();
     $user = $result->fetch_assoc();
-    $_SESSION["id_usuario"] = $user["id_usuario"];
-    $_SESSION["tipo_usuario"] = $user["tipo_usuario"];
-    if ($tipoUsuario == "Professor") {
-        header("Location: ../view/professor/laboratorios.php");
-    } else if ($tipoUsuario == "Aluno") {
-        header("Location: ../view/aluno/mensagem_aluno.php");
-    } else if ($tipoUsuario == "Manutencao") {
-        header("Location: ../view/manutencao/manutencao.php");
-    } else {
-        header("Location: ../view/Login.html");
+    // Verifica a senha usando password_verify
+    if (password_verify($senha, $user['senha_hash'])) {
+        session_start();
+        $_SESSION["id_usuario"] = $user["id_usuario"];
+        $_SESSION["tipo_usuario"] = $user["tipo_usuario"];
+        if ($tipoUsuario == "Professor") {
+            header("Location: ../view/professor/laboratorios.php");
+        } else if ($tipoUsuario == "Aluno") {
+            header("Location: ../view/aluno/mensagem_aluno.php");
+        } else if ($tipoUsuario == "Manutencao") {
+            header("Location: ../view/manutencao/manutencao.php");
+        } else {
+            header("Location: ../view/Login.html");
+        }
+        exit();
     }
-    exit();
-} else {
-    header("Location: ../view/Login.html");
-    exit();
 }
+
+// Falha de login
+header("Location: ../view/Login.html");
+exit();
